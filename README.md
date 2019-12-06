@@ -2,4 +2,4 @@
 Statistical Shape Modeling
 
 
-![Folders architecture](/home/emilie/Benni_Handover/EMI_Documentation/GPA_IterationFolders.png)
+![Folders architecture](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/GPA_IterationFolders.png)
