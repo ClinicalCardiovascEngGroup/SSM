@@ -22,5 +22,5 @@ use solely the Prinicpal Component Analysis part have using the latest Deformatr
 
 
 
-
+This is an overview of the folders structure created by the SSM code:
 ![Folders architecture](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/GPA_IterationFolders.png)
