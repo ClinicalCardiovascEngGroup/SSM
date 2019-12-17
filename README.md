@@ -1,5 +1,6 @@
-# SSM
-Statistical Shape Modeling
+# Statistical Shape Modeling (SSM)
+
+SSM is a tool to compute averaged shape and its variations within a coherent family of geometries (or training set). It is based on the assumption that each shape of the family is a deformed version of a reference shape. It used Principal Component Analysis (PCA) on a set of landmark points to dsecribe the shape of an object.
 
 ----------------------------------------------------------------------------------------
 Copyright (C) Jan Bruse 2017 - jan.bruse@gmail.com, All rights reserved.                     
