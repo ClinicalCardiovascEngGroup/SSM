@@ -16,7 +16,7 @@ Biomarkers from Medical Imaging Data: Assessing Arch Morphology of Repaired Coar
 of the Aorta." BMC Medical Imaging 16, no. 1.                                                
                                                                                              
 This code has been updated by Emilie Sauvage (July 2019) in order                        
-use solely the Prinicpal Component Analysis part have using the latest Deformatrica version (v4.2)
+use solely the Prinicpal Component Analysis part using the latest Deformatrica version (v4.2)
 
 ----------------------------------------------------------------------------------------
 
