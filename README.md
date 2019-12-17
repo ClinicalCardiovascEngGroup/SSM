@@ -8,8 +8,8 @@ Literature references:
 * Durrleman, Stanley, et al. "Morphometry of anatomical shape complexes with dense deformations and sparse parameters." NeuroImage 101 (2014): 35-49.
 
 ----------------------------------------------------------------------------------------
-This Matlab code was created by Dr. Jan Bruse and Dr. Benedetta Biffi in 2017. It consists of a GUI interface calling
-two other free sofwtares: Deformetrica 4.2 (http://www.deformetrica.org/) and VMTK 1.4 (http://www.vmtk.org/)
+This Matlab code was created by Dr. Jan Bruse and Dr. Benedetta Biffi in 2017. It consists of a Matlab GUI interface calling
+two other free softwares responsible for the PCA and the shapes registration: Deformetrica 4.2 (http://www.deformetrica.org/) and VMTK 1.4 (http://www.vmtk.org/)
 to allow a smooth experience of the user with statitiscal shape modelling. 
 
 Copyright (C) Jan Bruse 2017 - jan.bruse@gmail.com, All rights reserved.                     
