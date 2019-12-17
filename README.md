@@ -8,6 +8,10 @@ Literature references:
 * 
 
 ----------------------------------------------------------------------------------------
+This Matlab code was created by Dr. Jan Bruse and Dr. Benedetta Biffi in 2017. It consists of a GUI interface calling
+two other free sofwtares: Deformetrica 4.2 (http://www.deformetrica.org/) and VMTK 1.4 (http://www.vmtk.org/)
+to allow a smooth experience of the user of the use 
+
 Copyright (C) Jan Bruse 2017 - jan.bruse@gmail.com, All rights reserved.                     
 Copyright (C) Benedetta Biffi 2017- benedetta.biffi89@gmail.com, All rights reserved.        
                                                                                              
