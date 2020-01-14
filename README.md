@@ -30,8 +30,7 @@ This code has been updated by Emilie Sauvage (July 2019) in order
 use solely the Prinicpal Component Analysis part using the latest Deformatrica version (v4.2)
 
 ----------------------------------------------------------------------------------------
-
-
+Note for beginners: before you start please read the code and folder structure below:
 
 This is an overview of the folders structure created by the SSM code:
 
