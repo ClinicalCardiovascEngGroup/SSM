@@ -37,6 +37,7 @@ This is an overview of the folders structure created by the SSM code:
 
 ![Folders architecture](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/GPA_IterationFolders.png)
 
+To #run the code please folow these instructions:
 
 For those of you who which to work on the code directly, here is a small overview of the code architecture:
 
