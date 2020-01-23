@@ -4,7 +4,7 @@ This Matlab code was created by Dr. Jan Bruse and Dr. Benedetta Biffi in 2017. I
 two other free softwares responsible for the PCA and the shapes registration: Deformetrica 4.2 (http://www.deformetrica.org/) and VMTK 1.4 (http://www.vmtk.org/)
 to allow a smooth experience of the user with statitiscal shape modelling. 
 
-SSM is a tool to compute averaged shape and its variations within a coherent family of geometries (or training set). It is based on the assumption that each shape of the family is a deformed version of a reference shape. It used Principal Component Analysis (PCA) on a set of landmark points to describe the shape of an object.
+SSM is a tool to compute averaged shape and its variations within a coherent family of geometries (or training set). It is based on the assumption that each shape of the family is a deformed version of a reference shape. It uses Principal Component Analysis (PCA) on a set of landmark points to describe the shape of an object.
 
 ----------------------------------------------------------------------------------------
 Literature references:
