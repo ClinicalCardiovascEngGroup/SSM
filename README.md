@@ -38,11 +38,11 @@ This is **an overview of the folders structure** created by the SSM code:
 ![Folders architecture](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/GPA_IterationFolders.png)
 
 To **run** the code please folow these instructions:
-*step 0* Make sure that Test_Folder (/home/emilie/Benni_Handover/EMI_SSAtoolbox/Test_BenniCode) ONLY contains the STLs files and nothing else (no folder named "RegistrationAtlasConstruction" for example)
-*step 1* Go to "SSM" directory which contains the "main" file (ShapeAnalysis_OnlyPCA_2019.m)
-*step 2* Type in a terminal "shapenv" --> this will call VMTK and Deformetrica environments
-*step 3* Then type the command: "matlab ShapeAnalysis_OnlyPCA_2019.m"
-*step 4* Click in the middle of the text editor where the main code appears (green play botton on top panel). A window "MATLAB Editor" appears asking to change the current folder path. Click on "Change Folder" button and go to your Test_Folder
+*step 0* Make sure that Test_Folder ONLY contains the STLs files and nothing else (no folder named "RegistrationAtlasConstruction" for example)\
+*step 1* Go to "SSM" directory which contains the "main" file (ShapeAnalysis_OnlyPCA_2019.m)\
+*step 2* Type in a terminal "shapenv" --> this will call VMTK and Deformetrica environments\
+*step 3* Then type the command: "matlab ShapeAnalysis_OnlyPCA_2019.m"\
+*step 4* Click in the middle of the text editor where the main code appears (green play botton on top panel). A window "MATLAB Editor" appears asking to change the current folder path. Click on "Change Folder" button and go to your Test_Folder\
 
 
 For those of you who which to work on the code directly, here is a small overview of the code architecture:
