@@ -37,7 +37,8 @@ This is **an overview of the folders structure** created by the SSM code:
 
 ![Folders architecture](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/GPA_IterationFolders.png)
 
-To **run** the code please folow these instructions:
+To **run** the code please folow these instructions:\
+
 *step 0* Make sure that Test_Folder ONLY contains the STLs files and nothing else (no folder named "RegistrationAtlasConstruction" for example)\
 *step 1* Go to "SSM" directory which contains the "main" file (ShapeAnalysis_OnlyPCA_2019.m)\
 *step 2* Type in a terminal "shapenv" --> this will call VMTK and Deformetrica environments\
