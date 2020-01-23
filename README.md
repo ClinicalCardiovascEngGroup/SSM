@@ -32,7 +32,7 @@ use solely the Prinicpal Component Analysis part using the latest Deformatrica v
 ----------------------------------------------------------------------------------------
 Note for beginners: before you start please read the code and folder structure below:
 
-This is **an overview of the folders structure** created by the SSM code:
+This is **an overview structure of the folders** created by the SSM code during a run:
 
 
 ![Folders architecture](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/GPA_IterationFolders.png)
