@@ -30,7 +30,25 @@ This code has been updated by Emilie Sauvage (July 2019) in order
 use solely the Prinicpal Component Analysis part using the latest Deformatrica version (v4.2)
 
 ----------------------------------------------------------------------------------------
-Note for beginners: before you start please read the code and folder structure below:
+
+### Dependencies of the code:
+
+* MATLAB (not older than R2018b)
+* Deformetrica 4.2
+* VMTK 1.4
+
+
+----------------------------------------------------------------------------------------
+### How to  - Manual
+
+Please clone the Git repository on your machine:
+`git clone https://github.com/ClinicalCardiovascEngGroup/SSM.git`
+
+Alternatively, if you are NOT planning to modify the code and use the sources as such, you can also download the content of the repository on your machine.
+
+
+#### Note for beginners:
+before you start running the code please read the code and folder structure below:
 
 This is **an overview structure of the folders** created by the SSM code during a run:
 
