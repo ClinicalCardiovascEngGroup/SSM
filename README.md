@@ -46,8 +46,9 @@ Please clone the Git repository on your machine:
 
 Alternatively, if you are NOT planning to modify the code and use the sources as such, you can also download the content of the repository on your machine.
 
+What you will get is a main file `ShapeAnalysis.m` and a folder containing all MATLAB functions called by the main.
 
-#### Note for beginners:
+#### Note for new comers:
 before you start running the code please read the code and folder structure below:
 
 This is **an overview structure of the folders** created by the SSM code during a run:
@@ -57,11 +58,17 @@ This is **an overview structure of the folders** created by the SSM code during 
 
 To **run** the code please folow these instructions:
 
-* *Step 0*: Make sure that Test_Folder ONLY contains the STLs files and nothing else (no folder named "RegistrationAtlasConstruction" for example)\
-* *Step 1*: Go to "SSM" directory which contains the "main" file (ShapeAnalysis_OnlyPCA_2019.m)\
-* *Step 2*: Type in a terminal "shapenv" --> this will call VMTK and Deformetrica environments\
-* *Step 3*: Then type the command: "matlab ShapeAnalysis_OnlyPCA_2019.m"\
-* *Step 4*: Click in the middle of the text editor where the main code appears (green play botton on top panel). A window "MATLAB Editor" appears asking to change the current folder path. Click on "Change Folder" button and go to your Test_Folder\
+* *Step 0*: Make sure that Test_Folder ONLY contains the STLs files and nothing else (no folder named "RegistrationAtlasConstruction" for example)
+* *Step 1*: Go to "SSM" directory which contains the "main" file (ShapeAnalysis_OnlyPCA_2019.m)
+* *Step 2*: Type in a terminal "shapenv" --> this will call VMTK and Deformetrica environments
+* *Step 3*: Then type the command: "matlab ShapeAnalysis_OnlyPCA_2019.m"
+* *Step 4*: Click in the middle of the text editor where the main code appears (green play botton on top panel). A window "MATLAB Editor" appears asking to change the current folder path. Click on "Change Folder" button and go to your Test_Folder
+* *Step 5*: A first menu with 2 choices appears. Click on the top button "Registration and Atlas construction"
+
+If you choose "Registration and Atlas construction":
+
+* *Step 6*: A window appears asking to select the input mesh files for Registration. Go to Test_Folder ie. "/SSM/Test_Folder" and select (highlight) ALL STL files presents. You should also see a folder named :"RegistrationAtlasConstruction". Don't worry about this folder - it was created after step nr. 4
+This 5th step will first create an Input folder (See the overview structure of the folders in the picture above  - GPA_IterationFolders.png).
 
 
 For those of you who which to work on the code directly, here is a small overview of the code architecture:
