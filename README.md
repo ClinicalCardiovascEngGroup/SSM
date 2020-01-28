@@ -115,9 +115,13 @@ This 5th step will first create an Input folder (See the overview structure of t
 
 To perform the GPA analysis on the registered geometries:
   
-* *Step 7*: After iteration 0, you should be prompted with another menu (of 3 entries) asking you "What would you like to compute?". Click on "Registration - Generalized Procustes Analysis". This step will perform the next iteration (=iteration nr.1) and prompted you with a small "End session" window asking you: "Would you like to continue with another registration and atlas construction step?". Click on "Yes" to perform the next iteration. 
+* *Step 7*: After iteration 0, you should be prompted with another menu (of 3 entries) asking you "What would you like to compute?". Click on "Registration - Generalized Procustes Analysis". During this step, two consecutive actions are taking place: a registration with VMTK then the computation of the average shape computation from the previously registered geometries.
 
 ![Menu 2](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Screenshot_Menu2.png)
+
+This step will perform the next iteration (=iteration nr.1) and prompted you with a small "End session" window asking you: "Would you like to continue with another registration and atlas construction step?". Click on "Yes" to perform the next iteration.
+
+![End Session 1](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Screenshot_EndSession1.png)
 
 * *Step 8*: The same menu (of 3 entries) asking you "What would you like to compute?" will appear. Click one more time on "Registration - Generalized Procustes Analysis". An additional window with all parameters needed for the computation of the averaged model from Deformatrica will appear. Modify those parameters as you wish (default parameters are provided). Press on "OK" button. We are now at iteration nr. 2. In the folder "RegistrationAtlasConstruction", you should now see 3 sub-folders: Input, iteration_1, iteration_2
 At the end of this step you should see a graph window displaying distance from previous template vs. number of iterations and another small "end session" window asking: "Would you like to continue with another registration and atlas construction step?". Click on "Yes" to perform the next iteration. 
