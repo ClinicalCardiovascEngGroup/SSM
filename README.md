@@ -2,7 +2,7 @@
 
 This Matlab code was created by Dr. Jan Bruse and Dr. Benedetta Biffi in 2017. It consists of a Matlab GUI interface calling
 two other free softwares responsible for the PCA and the shapes registration: Deformetrica 4.2 (http://www.deformetrica.org/) and VMTK 1.4 (http://www.vmtk.org/)
-to allow a smooth experience of the user with statitiscal shape modelling. 
+to allow a smooth experience of the user with statistical shape modelling. 
 
 SSM is a tool to compute averaged shape and its variations within a coherent family of geometries (or training set). It is based on the assumption that each shape of the family is a deformed version of a reference shape. It uses Principal Component Analysis (PCA) on a set of landmark points to describe the shape of an object.
 
@@ -27,7 +27,7 @@ Biomarkers from Medical Imaging Data: Assessing Arch Morphology of Repaired Coar
 of the Aorta." BMC Medical Imaging 16, no. 1.                                                
                                                                                              
 This code has been updated by Emilie Sauvage (July 2019) in order                        
-use solely the Prinicpal Component Analysis part using the latest Deformatrica version (v4.2)
+use solely the Principal Component Analysis part using the latest Deformetrica version (v4.2)
 
 ----------------------------------------------------------------------------------------
 
@@ -97,13 +97,13 @@ For Linux users, you are advised to create the following environment in your .ba
 
 **************
 
-To **run** the code please folow these instructions:
+To **run** the code please follow these instructions:
 
 * *Step 0*: Make sure that Test_Folder ONLY contains the STLs files and nothing else (no folder named "RegistrationAtlasConstruction" for example)
 * *Step 1*: Go to "SSM" directory which contains the "main" file (ShapeAnalysis_OnlyPCA_2019.m)
 * *Step 2*: Type in a terminal "shapenv" --> this will call VMTK and Deformetrica environments
 * *Step 3*: Then type the command: "matlab ShapeAnalysis_OnlyPCA_2019.m"
-* *Step 4*: Click in the middle of the text editor where the main code appears (green play botton on top panel). A window "MATLAB Editor" appears asking to change the current folder path. Click on "Change Folder" button and go to your Test_Folder
+* *Step 4*: Click in the middle of the text editor where the main code appears (green play button on top panel). A window "MATLAB Editor" appears asking to change the current folder path. Click on "Change Folder" button and go to your Test_Folder
 * *Step 5*: A first menu with 2 choices appears. Click on the top button "Registration and Atlas construction"
 
 ![Menu 1](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Screenshot_Menu1.png)
@@ -125,7 +125,7 @@ This step will perform the next iteration (=iteration nr.1) and prompted you wit
 
 * *Step 8*: The same menu (of 3 entries) asking you "What would you like to compute?" will appear. Click one more time on "Registration - Generalized Procustes Analysis". First a new registration is performed with VMTK and a new folder appears "iteration_2".
 
-An additional window with all parameters needed for the computation of the averaged model from Deformatrica will appear. Modify those parameters as you wish (default parameters are provided). Press on "OK" button. We are now at iteration nr. 2. In the folder "RegistrationAtlasConstruction", you should now see 3 sub-folders: Input, iteration_1, iteration_2
+An additional window with all parameters needed for the computation of the averaged model from Deformetrica will appear. Modify those parameters as you wish (default parameters are provided). Press on "OK" button. We are now at iteration nr. 2. In the folder "RegistrationAtlasConstruction", you should now see 3 sub-folders: Input, iteration_1, iteration_2
 
 ![Deformetrica Parameters](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Screenshot_DeformetricaParameters.png)
 
@@ -138,7 +138,7 @@ At the end of this step you should see a graph window displaying distance from p
 ![End Session 2](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Screenshot_EndSession2.png)
 
 * *Step 9*: After iteration 2, you should be prompted with another menu (of 3 entries) asking you "What would you like to compute?". Click on "Registration - Generalized Procustes Analysis". This step will perform the next iteration (=iteration nr.3) 
-Continue the ietrations until you are statisfied with the distance from the previous template - the curve should reach a plateau after a few iteration - this plateau is a good moment to stop iterating.
+Continue the iterations until you are satisfied with the distance from the previous template - the curve should reach a plateau after a few iteration - this plateau is a good moment to stop iterating.
 
 ![DistIteration Graph 2](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/DistIteration2.png)
 
