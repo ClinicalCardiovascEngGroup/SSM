@@ -113,6 +113,20 @@ If you choose "Registration and Atlas construction":
 * *Step 6*: A window appears asking to select the input mesh files for Registration. Go to Test_Folder ie. "/SSM/Test_Folder" and select (highlight) ALL STL files presents. You should also see a folder named :"RegistrationAtlasConstruction". Don't worry about this folder - it was created after step nr. 4
 This 5th step will first create an Input folder (See the overview structure of the folders in the picture above  - GPA_IterationFolders.png).
 
+To perform the GPA analysis on the registered geometries:
+  
+* *Step 7*: After iteration 0, you should be prompted with another menu (of 3 entries) asking you "What would you like to compute?". Click on "Registration - Generalized Procustes Analysis". This step will perform the next iteration (=iteration nr.1) and prompted you with a small "End session" window asking you: "Would you like to continue with another registration and atlas construction step?". Click on "Yes" to perform the next iteration. 
+
+![Menu 2](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Screenshot_Menu2.png)
+
+* *Step 8*: The same menu (of 3 entries) asking you "What would you like to compute?" will appear. Click one more time on "Registration - Generalized Procustes Analysis". An additional window with all parameters needed for the computation of the averaged model from Deformatrica will appear. Modify those parameters as you wish (default parameters are provided). Press on "OK" button. We are now at iteration nr. 2. In the folder "RegistrationAtlasConstruction", you should now see 3 sub-folders: Input, iteration_1, iteration_2
+At the end of this step you should see a graph window displaying distance from previous template vs. number of iterations and another small "end session" window asking: "Would you like to continue with another registration and atlas construction step?". Click on "Yes" to perform the next iteration. 
+
+* *Step 9*: After iteration 2, you should be prompted with another menu (of 3 entries) asking you "What would you like to compute?". Click on "Registration - Generalized Procustes Analysis". This step will perform the next iteration (=iteration nr.3) 
+Continue the ietrations until you are statisfied with the distance from the previous template - the curve should reach a plateau after a few iteration - this plateau is a good moment to stop iterating.
+
+
+**************
 
 For those of you who which to work on the code directly, here is a small overview of the code architecture:
 
