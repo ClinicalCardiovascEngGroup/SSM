@@ -39,15 +39,56 @@ use solely the Prinicpal Component Analysis part using the latest Deformatrica v
 
 
 ----------------------------------------------------------------------------------------
-### How to  - Manual
+### How to run - Manual
 
 Please clone the Git repository on your machine:
 `git clone https://github.com/ClinicalCardiovascEngGroup/SSM.git`
 
 Alternatively, if you are NOT planning to modify the code and use the sources as such, you can also download the content of the repository on your machine.
 
-What you will get is a main file `ShapeAnalysis.m` and a folder containing all MATLAB functions called by the main.
+What you will get:
+* a main file `ShapeAnalysis.m` 
+* a folder containing all MATLAB functions called by the main
+* a PDF document written by Dr. Bruse and Dr. Biffi giving more details on the present Matlab code
+* a README.md 
 
+Before you start, make sure all dependencies are correctly installed and tested.
+For Linux users, you are advised to create the following environment in your .bashrc:
+
+`function condaenv {
+  __conda_setup="$('/opt/anaconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+  if [ $? -eq 0 ]; then
+      eval "$__conda_setup"
+  else
+      if [ -f "/opt/anaconda3/etc/profile.d/conda.sh" ]; then
+          . "/opt/anaconda3/etc/profile.d/conda.sh"
+      else
+          export PATH="/opt/anaconda3/bin:$PATH"
+      fi
+  fi
+  unset __conda_setup
+
+  export PATH=/opt/anaconda3/bin:$PATH
+}`
+
+`function deformenv {
+  condaenv
+  conda activate deformetrica
+}
+
+function vmtkenv
+{
+  source /opt/vmtk/Install/vmtk_env.sh
+}`
+
+
+`function shapenv {
+  vmtkenv
+  deformenv
+}`
+
+
+**************
 #### Note for new comers:
 before you start running the code please read the code and folder structure below:
 
@@ -72,4 +113,8 @@ This 5th step will first create an Input folder (See the overview structure of t
 
 
 For those of you who which to work on the code directly, here is a small overview of the code architecture:
+
+
+----------------------------------------------------------------------------------------
+### More info on the details of the code, here:
 
