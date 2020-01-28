@@ -134,6 +134,7 @@ Continue the ietrations until you are statisfied with the distance from the prev
 
 For those of you who which to work on the code directly, here is a small overview of the code architecture:
 
+![Code Call Graph](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/CodeArchitecture.png)
 
 ----------------------------------------------------------------------------------------
 ### More info on the details of the code, here:
