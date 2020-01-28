@@ -49,6 +49,7 @@ Alternatively, if you are NOT planning to modify the code and use the sources as
 What you will get:
 * a main file `ShapeAnalysis.m` 
 * a folder containing all MATLAB functions called by the main
+* a folder containing several screenshots (PNG files) from the interface
 * a PDF document written by Dr. Bruse and Dr. Biffi giving more details on the present Matlab code
 * a README.md 
 
@@ -89,13 +90,12 @@ For Linux users, you are advised to create the following environment in your .ba
 
 
 **************
-#### Note for new comers:
-before you start running the code please read the code and folder structure below:
-
-This is **an overview structure of the folders** created by the SSM code during a run:
+ **Overview structure of the folders** created by the SSM code during a run:
 
 
 ![Folders architecture](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/GPA_IterationFolders.png)
+
+**************
 
 To **run** the code please folow these instructions:
 
@@ -144,11 +144,11 @@ Continue the ietrations until you are statisfied with the distance from the prev
 
 
 **************
-### Fo
-For those of you who which to work on the code directly, here is a small overview of the code architecture:
+### For the developers
+For those of you who wish to work on the code directly, here is a small overview of the code architecture:
 
 ![Code Call Graph](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/CodeArchitecture.png)
 
 ----------------------------------------------------------------------------------------
-### More info on the details of the code, here:
+#### To go further:
 
