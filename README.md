@@ -74,9 +74,9 @@ For Linux users, you are advised to create the following environment in your .ba
 `function deformenv {
   condaenv
   conda activate deformetrica
-}
+}`
 
-function vmtkenv
+`function vmtkenv
 {
   source /opt/vmtk/Install/vmtk_env.sh
 }`
