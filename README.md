@@ -11,6 +11,7 @@ Literature references:
 
 * Durrleman, Stanley, et al. "Morphometry of anatomical shape complexes with dense deformations and sparse parameters." NeuroImage 101 (2014): 35-49.
 * Bône, Alexandre, et al. "Deformetrica 4: an open-source software for statistical shape analysis." International Workshop on Shape in Medical Imaging. Springer, Cham, 2018.
+* Antiga, Luca, et al. "An image-based modeling framework for patient-specific computational hemodynamics." Medical & biological engineering & computing 46.11 (2008): 1097.
 
 ----------------------------------------------------------------------------------------
 
