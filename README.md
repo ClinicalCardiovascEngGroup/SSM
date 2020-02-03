@@ -93,7 +93,7 @@ For Linux users, you are advised to create the following environment in your .ba
  **Overview structure of the folders** created by the SSM code during a run:
 
 
-![Folders architecture](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/GPA_IterationFolders.png)
+![Folders architecture](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Illustrations/GPA_IterationFolders.png)
 
 **************
 
@@ -106,7 +106,7 @@ To **run** the code please follow these instructions:
 * *Step 4*: Click in the middle of the text editor where the main code appears (green play button on top panel). A window "MATLAB Editor" appears asking to change the current folder path. Click on "Change Folder" button and select your 'Test_Folder'
 * *Step 5*: A first menu with 2 choices appears. Click on the top button "Registration and Atlas construction"
 
-![Menu 1](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Screenshot_Menu1.png)
+![Menu 1](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Illustrations/Screenshot_Menu1.png)
 
 If you choose "Registration and Atlas construction":
 
@@ -117,37 +117,37 @@ To perform the GPA analysis on the registered geometries:
 
 * *Step 7*: After iteration 0, you should be prompted with another menu (of 3 entries) asking you "What would you like to compute?". Click on "Registration - Generalized Procustes Analysis". This step performs a registration of all geometries with VMTK. A new folder "iteration_1" is created that contains all registered geometries in VTK format along with other distance information files.
 
-![Menu 2](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Screenshot_Menu2.png)
+![Menu 2](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Illustrations/Screenshot_Menu2.png)
 
 This step will perform the next iteration (=iteration nr.1) and prompted you with a small "End session" window asking you: "Would you like to continue with another registration and atlas construction step?". Click on "Yes" to perform the next iteration.
 
-![End Session 1](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Screenshot_EndSession1.png)
+![End Session 1](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Illustrations/Screenshot_EndSession1.png)
 
 * *Step 8*: The same menu (of 3 entries) asking you "What would you like to compute?" will appear. Click one more time on "Registration - Generalized Procustes Analysis". First a new registration is performed with VMTK and a new folder appears "iteration_2".
 
 An additional window with all parameters needed for the computation of the averaged model from Deformetrica will appear. Modify those parameters as you wish (default parameters are provided). Press on "OK" button. We are now at iteration nr. 2. In the folder "RegistrationAtlasConstruction", you should now see 3 sub-folders: Input, iteration_1, iteration_2
 
-![Deformetrica Parameters](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Screenshot_DeformetricaParameters.png)
+![Deformetrica Parameters](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Illustrations/Screenshot_DeformetricaParameters.png)
 
 Once you have validated the parameters, Deformetrica will operate the computation of the average shape from the previously registered geometries. This might take a few minutes.
 
 At the end of this step you should see a graph window displaying distance from previous template vs. number of iterations and another small "end session" window asking: "Would you like to continue with another registration and atlas construction step?". Click on "Yes" to perform the next iteration.
 
-![DistIteration Graph 1](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/DistIteration1.png)
+![DistIteration Graph 1](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Illustrations/DistIteration1.png)
 
-![End Session 2](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Screenshot_EndSession2.png)
+![End Session 2](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Illustrations/Screenshot_EndSession2.png)
 
 * *Step 9*: After iteration 2, you should be prompted with another menu (of 3 entries) asking you "What would you like to compute?". Click on "Registration - Generalized Procustes Analysis". This step will perform the next iteration (=iteration nr.3)
 Continue the iterations until you are satisfied with the distance from the previous template - the curve should reach a plateau after a few iteration - this plateau is a good moment to stop iterating.
 
-![DistIteration Graph 2](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/DistIteration2.png)
+![DistIteration Graph 2](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Illustrations/DistIteration2.png)
 
 
 **************
 ### For the developers
 For those of you who wish to work on the code directly, here is a small overview of the code architecture:
 
-![Code Call Graph](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/CodeArchitecture.png)
+![Code Call Graph](https://github.com/ClinicalCardiovascEngGroup/SSM/blob/master/Illustrations/CodeArchitecture.png)
 
 ----------------------------------------------------------------------------------------
 #### To go further:
