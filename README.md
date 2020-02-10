@@ -100,7 +100,7 @@ For Linux users, you are advised to create the following environment in your .ba
 To **run** the code please follow these instructions:
 
 * *Step 0*: Create a folder 'Test_Folder' that ONLY contains the STLs files and nothing else (no subfolder named "RegistrationAtlasConstruction" for example)
-* *Step 1*: Go to source "SSM" directory which contains the "main" file (ShapeAnalysis_OnlyPCA_2019.m)
+* *Step 1*: Go to the source folder "SSM" which contains the "main" file (ShapeAnalysis_OnlyPCA_2019.m)
 * *Step 2*: Type in a terminal `shapenv` --> this will call VMTK and Deformetrica environments
 * *Step 3*: Then type the command: `matlab ShapeAnalysis_OnlyPCA_2019.m`
 * *Step 4*: Click in the middle of the text editor where the main code appears (green play button on top panel). A window "MATLAB Editor" appears asking to change the current folder path. Click on "Change Folder" button and select your 'Test_Folder'
