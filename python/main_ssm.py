@@ -51,6 +51,7 @@ ao.compute_pca(with_plots=True)
 ae.shooting(ao.save_eigv(0), ae.odir + "pca/shoot0/")
 ae.shooting(ao.save_eigv(1), ae.odir + "pca/shoot1/")
 
+ao.render_momenta_norm(ao.get_eigv(2))
 
 ################################################################################
 ## Parameters
