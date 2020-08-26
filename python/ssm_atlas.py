@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 
 
-
-
 """
 Atlas estimation using deformetrica
 
@@ -58,10 +56,9 @@ class DeformetricaAtlasEstimation():
 
         self.dataset_xml = ""
 
-        self.optimization_parameters_xml = os.path.join(os.path.dirname(__file__), "optimization_parameters.xml")
-        self.model_xml = os.path.join(os.path.dirname(__file__), "model-atlas-template.xml")
+        self.optimization_parameters_xml = os.path.join(os.path.dirname(__file__), "ressources/optimization_parameters.xml")
+        self.model_xml = os.path.join(os.path.dirname(__file__), "ressources/model-atlas-template.xml")
 
-        self.check_initialisation()
 
     def check_initialisation(self):
         """ check that the input paths exist """
@@ -89,7 +86,7 @@ class DeformetricaAtlasEstimation():
 
         self.idir = __get_input_path("Set input directory", self.idir)
 
-        nfiles = len(glob.glob(os.path.join(self.idir, "*.vtk"))
+        nfiles = len(glob.glob(os.path.join(self.idir, "*.vtk")))
         print(nfiles, "vtk-files in input directory")
 
 
@@ -103,14 +100,13 @@ class DeformetricaAtlasEstimation():
         except ValueError:
             pass
 
-
         self.initial_guess = __get_input_path("Set initial mesh", self.initial_guess)
         self.optimization_parameters_xml = __get_input_path("Set optimization xml",self.optimization_parameters_xml)
         self.model_xml = __get_input_path("Set model xml",self.model_xml)
 
-        self.p_kernel_width_geometry = __get_input_float('Set kernel width geometry: ', 10.)
-        self.p_kernel_width_deformation =  __get_input_float('Set kernel width deformation: ', 20.)
-        self.p_noise =  __get_input_float('Set noise level: ', 10.)
+        self.p_kernel_width_geometry = __get_input_float('Set kernel width geometry: ', self.p_kernel_width_geometry)
+        self.p_kernel_width_deformation =  __get_input_float('Set kernel width deformation: ', self.p_kernel_width_deformation)
+        self.p_noise =  __get_input_float('Set noise level: ', self.p_noise)
 
     def get_path_initial_guess(self, k):
         """ path of data of subject k """
