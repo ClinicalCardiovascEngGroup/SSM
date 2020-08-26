@@ -59,6 +59,7 @@ if __name__ == "__main__":
 
     params = input_parameters()
 
+    sp.call(["mkdir", "-p", params["--odir"]])
     ae = ssm_atlas.DeformetricaAtlasEstimation(params)
     ae.estimate()
 

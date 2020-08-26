@@ -59,17 +59,25 @@ class DeformetricaAtlasEstimation():
         self.optimization_parameters_xml = os.path.join(os.path.dirname(__file__), "ressources/optimization_parameters.xml")
         self.model_xml = os.path.join(os.path.dirname(__file__), "ressources/model-atlas-template.xml")
 
+    def __get_list_vtk(self):
+        """ list of vtk using prefix in self.idir """
+        if os.path.isdir(self.idir):
+            return glob.glob(os.path.join(self.idir, "*.vtk"))
+        else:
+            return glob.glob(self.idir + "*.vtk")
+
+
 
     def check_initialisation(self):
         """ check that the input paths exist """
 
-        def __get_input_path(s, p):
+        def __get_input_path(s, p, pass_check=False):
             """ ask for a path using string s and default value p """
             while True:
                 x = input(s + " [{}]: ".format(p))
                 if x == "":
                     x = p
-                if os.path.exists(x):
+                if pass_check or os.path.exists(x):
                     return x
                 else:
                     print("path {} does not exist".format(x))
@@ -84,11 +92,8 @@ class DeformetricaAtlasEstimation():
                 except ValueError:
                     print("not a float")
 
-        self.idir = __get_input_path("Set input directory", self.idir)
-
-        nfiles = len(glob.glob(os.path.join(self.idir, "*.vtk")))
-        print(nfiles, "vtk-files in input directory")
-
+        self.idir = __get_input_path("Set input directory", self.idir, True)
+        print(len(self.__get_list_vtk()), "vtk-files in input directory")
 
         self.odir = __get_input_path("Set output directory", self.odir)
         #sp.call(["mkdir", "-p", self.odir])
@@ -110,13 +115,12 @@ class DeformetricaAtlasEstimation():
 
     def get_path_initial_guess(self, k):
         """ path of data of subject k """
-        lf = glob.glob(os.path.join(self.idir, "*.vtk"))
+        lf = self.__get_list_vtk()
         return lf[k]
 
     def create_dataset_xml(self):
         """ with every vtk files in idir """
-        lf = glob.glob(os.path.join(self.idir, "*.vtk"))
-
+        lf = self.__get_list_vtk()
         fxml = os.path.join(self.odir, "dataset.xml")
 
         create_data_set_xml.create_xml_atlas(lf, fxml, self.id)
