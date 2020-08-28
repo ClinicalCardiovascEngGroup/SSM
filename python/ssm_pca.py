@@ -58,13 +58,12 @@ class DeformetricaAtlasOutput():
         """
         a_momenta = np.loadtxt(self.idir + "DeterministicAtlas__EstimatedParameters__Momenta.txt")
         shape = a_momenta[0,:].astype("int")
-        m = a_momenta[1:, :].reshape(shape)
         self.momenta = a_momenta[1:, :].reshape(shape)
         print("subjects, control_points, dim:", self.momenta.shape)
         return self.momenta
 
     def central_point(self):
-        """ using the momenta return:
+        """ using the momenta, return:
             - the mean momentum
             - the closest subject (id)
         """
@@ -142,9 +141,10 @@ class DeformetricaAtlasOutput():
     def convolve_momentum(self, m, x):
         """
         kernel convolution of momenta at points x
-            m : np.array K, 3, K=number of controls points
-            kw: float,  kernel width
-            x : np.array N, 3, coordinates
+            m : np.array K, 3,  K=number of controls points,
+                                ex: m=self.momenta[0,:], m=get_eigv(0)
+            kw: float,          kernel width
+            x : np.array N, 3,  coordinates
         """
 
         kern = kernel_factory.factory("torch", gpu_mode=True, kernel_width=self.kw)
@@ -160,11 +160,11 @@ class DeformetricaAtlasOutput():
         return np.array(t_z)
 
 
-    def render_momenta_norm(self, moments):
+    def render_momenta_norm(self, moments, name):
         """ render the norm of the momenta on the template geometry """
 
         # read mesh
-        v_pd = self.read_template("lvent")
+        v_pd = self.read_template(name)
         N = v_pd.GetPoints().GetNumberOfPoints()
         points = nps.vtk_to_numpy(v_pd.GetPoints().GetData()).astype('float64')
 
@@ -204,7 +204,6 @@ def rename_df2pv(prefix):
     print("  nb of files: ", len(fl))
 
     for i,f in enumerate(fl):
-        #print("mv", f, " --> " + v + "_tp{:03}.vtk".format(i))
         sp.call(["mv", f, prefix + "_tp{:03}.vtk".format(i)])
 
 
