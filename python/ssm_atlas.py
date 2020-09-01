@@ -59,13 +59,18 @@ class DeformetricaAtlasEstimation():
         self.optimization_parameters_xml = os.path.join(os.path.dirname(__file__), "ressources/optimization_parameters.xml")
         self.model_xml = os.path.join(os.path.dirname(__file__), "ressources/model-atlas-template.xml")
 
-    def __get_list_vtk(self):
+    def __get_list_vtk(self, sorted=False):
         """ list of vtk using prefix in self.idir """
+        lf = []
         if os.path.isdir(self.idir):
-            return glob.glob(os.path.join(self.idir, "*.vtk"))
+            lf = glob.glob(os.path.join(self.idir, "*.vtk"))
         else:
-            return glob.glob(self.idir + "*.vtk")
+            lf = glob.glob(self.idir + "*.vtk")
 
+        if sorted:
+            lf.sort()
+
+        return lf
 
 
     def check_initialisation(self):
@@ -115,12 +120,12 @@ class DeformetricaAtlasEstimation():
 
     def get_path_initial_guess(self, k):
         """ path of data of subject k """
-        lf = self.__get_list_vtk()
+        lf = self.__get_list_vtk(sorted=True)
         return lf[k]
 
     def create_dataset_xml(self):
         """ with every vtk files in idir """
-        lf = self.__get_list_vtk()
+        lf = self.__get_list_vtk(sorted=True)
         fxml = os.path.join(self.odir, "dataset.xml")
 
         create_data_set_xml.create_xml_atlas(lf, fxml, self.id)
