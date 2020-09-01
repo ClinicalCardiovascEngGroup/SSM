@@ -49,6 +49,39 @@ def vtkmatrix4x4_to_numpy(matrix):
     return m
 
 
+
+
+
+def controlpoints_to_vtkPoints(cp, mt=None):
+    """
+    convert control points array given by deformetrica to a vtk point cloud
+    if momenta are given add vector data to points
+    """
+    vldm = vtk.util.numpy_support.numpy_to_vtk(cp)
+    points = vtk.vtkPoints()
+    points.SetData(vldm)
+
+    pd = vtk.vtkPolyData()
+    pd.SetPoints(points)
+
+    if mt is not None:
+        vmt = vtk.util.numpy_support.numpy_to_vtk(mt)
+        pd.GetPointData().SetVectors(vmt)
+
+    return pd
+
+def controlpoints_to_vtkPoints_files(cpt_file, vtk_file, mmt_file=None):
+    """
+    same but with read/write
+    """
+    cp = np.loadtxt(cpt_file)
+    if mmt_file is not None:
+        mt = np.loadtxt(mmt_file)
+    else:
+        mt = None
+    pd = controlpoints_to_vtkPoints(cp, mt)
+    WritePolyData(vtk_file, pd)
+
 ################################################################################
 ##  IO
 
@@ -137,8 +170,12 @@ def ExtractGeometryZ(pd, nx, ny, nz, z0):
     function.SetNormal(nx, ny, nz)
     function.SetOrigin(0, 0, z0)
 
+    triangleFilter = vtk.vtkTriangleFilter()
+    triangleFilter.SetInputData(pd)
+    triangleFilter.Update()
+
     filter.SetImplicitFunction(function)
-    filter.SetInputData(pd)
+    filter.SetInputData(triangleFilter.GetOutput())
     filter.Update()
 
     geometryFilter = vtk.vtkGeometryFilter()
@@ -151,7 +188,6 @@ def ExtractGeometryZ(pd, nx, ny, nz, z0):
     connectFilter.Update()
 
     return connectFilter.GetOutput()
-
 
 def LandmarkSimilitudRegistration(fix, mov):
     """ landmarks registration from two vtkPoints """

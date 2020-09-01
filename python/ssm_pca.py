@@ -27,6 +27,9 @@ import support.kernels as kernel_factory
 
 
 
+import ssm_tools
+
+
 import logging
 logger = logging.getLogger("ssm_pca")
 logger.setLevel(logging.INFO)
@@ -43,11 +46,12 @@ logging.getLogger('matplotlib.font_manager').disabled = True
 class DeformetricaAtlasOutput():
     """ result of an DeterministicAtlas estimation """
 
-    def __init__(self, idir="", odir=""):
+    def __init__(self, idir="", odir="", kw=None):
         self.idir = idir
         self.odir = odir
         self.momenta = None
-        self.kw = None
+        self.ctrlpts = None
+        self.kw = kw
 
         if odir != "":
             sp.call(["mkdir", "-p", self.odir])
@@ -60,6 +64,9 @@ class DeformetricaAtlasOutput():
         shape = a_momenta[0,:].astype("int")
         self.momenta = a_momenta[1:, :].reshape(shape)
         print("subjects, control_points, dim:", self.momenta.shape)
+
+        self.ctrlpts = np.loadtxt(self.idir + "DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
+
         return self.momenta
 
     def central_point(self):
@@ -125,7 +132,13 @@ class DeformetricaAtlasOutput():
         A = self.get_eigv(k)
         fv = os.path.normpath(os.path.join(self.odir, "mode{}.txt".format(k)))
         np.savetxt(fv, A, fmt="%.6f")
+
+        vtkp = ssm_tools.controlpoints_to_vtkPoints(self.ctrlpts, A)
+        fv = os.path.normpath(os.path.join(self.odir, "mode{}.vtk".format(k)))
+        ssm_tools.WritePolyData(fv, vtkp)
+
         return fv
+
 
     def read_template(self, name):
         """ return polydata of the template """
