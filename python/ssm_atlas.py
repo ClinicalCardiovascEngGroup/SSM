@@ -25,10 +25,18 @@ import scipy, scipy.linalg
 import matplotlib
 import matplotlib.pyplot as plt
 
+import vtk
+from vtk.util import numpy_support as nps
+import torch
+
+
 import deformetrica
+# modules api, core, in_out and support are part of deformetrica \o/
+import support.kernels as kernel_factory
 
 
 import create_data_set_xml
+
 
 
 import logging
@@ -258,3 +266,60 @@ class DeformetricaAtlasEstimation():
             dataset_specifications,
             estimator_options=deformetrica.get_estimator_options(xml_parameters),
             model_options=deformetrica.get_model_options(xml_parameters))
+
+
+    def convolve_momentum(self, m, x):
+        """
+        kernel convolution of momenta at points x
+        m : np.array K, 3,  K=number of controls points,
+                            ex: m=self.momenta[0,:], m=get_eigv(0)
+        kw: float,          kernel width
+        x : np.array N, 3,  coordinates
+        """
+
+        kern = kernel_factory.factory("torch", gpu_mode=True, kernel_width=self.kw)
+
+        a_cp = np.loadtxt(self.odir + "output/DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
+        assert a_cp.shape == m.shape
+
+        t_y = torch.tensor(a_cp, device="cpu")
+        t_x = torch.tensor(x, device="cpu")
+        t_p = torch.tensor(m, device="cpu")
+
+        t_z = kern.convolve(t_x, t_y, t_p)
+        return np.array(t_z)
+
+    def read_template(self):
+        """ return polydata of the template """
+        ft = self.idir + "DeterministicAtlas__EstimatedParameters__Template_{}.vtk".format(self.id)
+        ft = os.path.abspath(ft).encode()
+
+        reader = vtk.vtkPolyDataReader()
+        reader.SetFileName(ft)
+        reader.Update()
+        v_pd = reader.GetOutput()
+        return v_pd
+
+    def render_momenta_norm(self, moments):
+        """ render the norm of the momenta on the template geometry """
+
+        # read mesh
+        v_pd = self.read_template()
+        N = v_pd.GetPoints().GetNumberOfPoints()
+        points = nps.vtk_to_numpy(v_pd.GetPoints().GetData()).astype('float64')
+
+        # compute attributes
+        z = self.convolve_momentum(moments, points)
+        print(z.shape)
+        d = np.sum(z**2, axis=1)
+        assert d.size == N
+
+        # set attributes
+        scalars = vtk.vtkFloatArray()
+        for i in range(N):
+            scalars.InsertTuple1(i, d[i])
+        v_pd.GetPointData().SetScalars(scalars)
+
+        # render
+        import visualization_tools
+        visualization_tools.renderVtkPolyData(v_pd, vmin=0., vmax=d.max())

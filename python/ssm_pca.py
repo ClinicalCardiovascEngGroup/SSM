@@ -13,19 +13,11 @@ import subprocess as sp
 import os, sys
 
 import numpy as np
-import vtk
-from vtk.util import numpy_support as nps
-import torch
 
 
 import scipy, scipy.linalg
 import matplotlib
 import matplotlib.pyplot as plt
-
-# modules api, core, in_out are part of deformetrica \o/
-import support.kernels as kernel_factory
-
-
 
 import ssm_tools
 
@@ -94,11 +86,23 @@ class DeformetricaAtlasOutput():
 
     def plot_pca_inertia(self):
         """ plot inertia and cumulative variance of pca modes """
-        fig, (ax0, ax1) = plt.subplots(1,2)
-        ax0.plot(self.pca_s)
-        ax1.plot((self.pca_s**2).cumsum()/(self.pca_s**2).sum())
+
+        matplotlib.rcParams.update({'font.size': 16})
+
+        fig, (ax0, ax1, ax2) = plt.subplots(1,3, figsize=(20,7))
+
+        ax0.plot(self.pca_s, "-", linewidth=3)
         ax0.set_title("Eigvalues")
-        ax1.set_title("Cumulative variance")
+        ax0.grid(True)
+
+        ax1.plot(self.pca_s[:10], "+-", linewidth=3, markersize=12, markeredgewidth=3)
+        ax1.set_title("First eigvalues (log-scale)")
+        ax1.grid(True)
+        ax1.set_yscale("log", nonposy='mask')
+
+        ax2.plot((self.pca_s**2).cumsum()/(self.pca_s**2).sum(), "+-", linewidth=3, markersize=8)
+        ax2.set_title("Cumulative variance")
+        ax2.grid(True)
 
         fig.savefig(self.odir + "fig_pca_inertia.png")
         return fig
@@ -106,17 +110,21 @@ class DeformetricaAtlasOutput():
     def plot_pca_projection(self):
         """ plot projection along the 4 first axes """
 
-        fig, (ax0,ax1) = plt.subplots(1,2, figsize=(12,6))
+        matplotlib.rcParams.update({'font.size': 16})
 
-        ax0.plot(self.pca_u[:, 0], self.pca_u[:, 1], ".", ms=7)
+        fig, (ax0,ax1) = plt.subplots(1,2, figsize=(14, 6))
+
+        ax0.plot(self.pca_s[0]*self.pca_u[:, 0], self.pca_s[1]*self.pca_u[:, 1], ".", ms=7)
         ax0.set_xlabel("eig0")
         ax0.set_ylabel("eig1")
         ax0.grid(True)
+        ax0.axis('equal')
 
-        ax1.plot(self.pca_u[:, 2], self.pca_u[:, 3], ".", ms=7)
+        ax1.plot(self.pca_s[2]*self.pca_u[:, 2], self.pca_s[3]*self.pca_u[:, 3], ".", ms=7)
         ax1.set_xlabel("eig2")
         ax1.set_ylabel("eig3")
         ax1.grid(True)
+        ax1.axis('equal')
 
         fig.savefig(self.odir + "fig_pca_projection.png")
         return fig
@@ -138,118 +146,3 @@ class DeformetricaAtlasOutput():
         ssm_tools.WritePolyData(fv, vtkp)
 
         return fv
-
-
-    def read_template(self, name):
-        """ return polydata of the template """
-        ft = self.idir + "DeterministicAtlas__EstimatedParameters__Template_{}.vtk".format(name)
-        ft = os.path.abspath(ft).encode()
-
-        reader = vtk.vtkPolyDataReader()
-        reader.SetFileName(ft)
-        reader.Update()
-        v_pd = reader.GetOutput()
-        return v_pd
-
-    def convolve_momentum(self, m, x):
-        """
-        kernel convolution of momenta at points x
-            m : np.array K, 3,  K=number of controls points,
-                                ex: m=self.momenta[0,:], m=get_eigv(0)
-            kw: float,          kernel width
-            x : np.array N, 3,  coordinates
-        """
-
-        kern = kernel_factory.factory("torch", gpu_mode=True, kernel_width=self.kw)
-
-        a_cp = np.loadtxt(self.idir + "DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
-        assert a_cp.shape == m.shape
-
-        t_y = torch.tensor(a_cp, device="cpu")
-        t_x = torch.tensor(x, device="cpu")
-        t_p = torch.tensor(m, device="cpu")
-
-        t_z = kern.convolve(t_x, t_y, t_p)
-        return np.array(t_z)
-
-
-    def render_momenta_norm(self, moments, name):
-        """ render the norm of the momenta on the template geometry """
-
-        # read mesh
-        v_pd = self.read_template(name)
-        N = v_pd.GetPoints().GetNumberOfPoints()
-        points = nps.vtk_to_numpy(v_pd.GetPoints().GetData()).astype('float64')
-
-        # compute attributes
-        z = self.convolve_momentum(moments, points)
-        print(z.shape)
-        d = np.sum(z**2, axis=1)
-        assert d.size == N
-
-        # set attributes
-        scalars = vtk.vtkFloatArray()
-        for i in range(N):
-            scalars.InsertTuple1(i, d[i])
-        v_pd.GetPointData().SetScalars(scalars)
-
-        # render
-        renderVtkPolyData(v_pd, vmin=0., vmax=d.max())
-
-################################################################################
-##  IO
-
-
-import glob, re
-
-def rename_df2pv(prefix):
-    """ changing suffixe to easily load in paraview """
-
-    def key_tp(f):
-        m = re.search("tp_(\d+)__age", f)
-        return int(m.group(1))
-
-    fl = glob.glob(prefix + "__tp_*__age_*.vtk")
-    fl.sort(key=key_tp)
-
-    print("Renaming files for paraview")
-    print("  regex: ", prefix + "__tp_*__age_*.vtk")
-    print("  nb of files: ", len(fl))
-
-    for i,f in enumerate(fl):
-        sp.call(["mv", f, prefix + "_tp{:03}.vtk".format(i)])
-
-
-def renderVtkPolyData(pd, vmin=0., vmax=1.):
-    """ render a vtk polydata mesh with scalar pointdata """
-
-    # Now we'll look at it.
-    cubeMapper = vtk.vtkPolyDataMapper()
-    cubeMapper.SetInputData(pd)
-    cubeMapper.SetScalarRange(vmin, vmax)
-    cubeActor = vtk.vtkActor()
-    cubeActor.SetMapper(cubeMapper)
-    print("vtk render: mapping scalar between: ", vmin, vmax)
-
-    # The usual rendering stuff.
-    camera = vtk.vtkCamera()
-    camera.SetPosition(1,1,1)
-    camera.SetFocalPoint(0,0,0)
-
-    renderer = vtk.vtkRenderer()
-    renWin   = vtk.vtkRenderWindow()
-    renWin.AddRenderer(renderer)
-
-    iren = vtk.vtkRenderWindowInteractor()
-    iren.SetRenderWindow(renWin)
-
-    renderer.AddActor(cubeActor)
-    renderer.SetActiveCamera(camera)
-    renderer.ResetCamera()
-    renderer.SetBackground(1,1,1)
-
-    renWin.SetSize(300,300)
-
-    # interact with data
-    renWin.Render()
-    iren.Start()

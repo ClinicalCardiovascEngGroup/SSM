@@ -60,7 +60,16 @@ if __name__ == "__main__":
     params = input_parameters()
 
     sp.call(["mkdir", "-p", params["--odir"]])
-    ae = ssm_atlas.DeformetricaAtlasEstimation(params)
+    ae = ssm_atlas.DeformetricaAtlasEstimation(
+        idir=params["--idir"],
+        odir=params["--odir"],
+        name=params["--name"],
+        initial_guess=params["--template"],
+        kwd=params["--kwg"],
+        kwg=params["--kwg"],
+        noise=params["--noise"])
+
+    ae.check_initialisation()
     ae.estimate()
 
 
@@ -70,9 +79,9 @@ if __name__ == "__main__":
 
     ao.kw = ae.p_kernel_width_deformation
 
-
     ao.compute_pca(with_plots=True)
+
     ae.shooting(ao.save_eigv(0), ae.odir + "pca/shoot0/")
     ae.shooting(ao.save_eigv(1), ae.odir + "pca/shoot1/")
 
-    ao.render_momenta_norm(ao.get_eigv(2), name=ae.id)
+    ae.render_momenta_norm(ao.get_eigv(1))
