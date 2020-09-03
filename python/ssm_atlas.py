@@ -44,15 +44,15 @@ logging.getLogger('matplotlib.font_manager').disabled = True
 class DeformetricaAtlasEstimation():
     """ result of an DeterministicAtlas estimation """
 
-    def __init__(self, params):
-        self.idir = params["--idir"]
-        self.odir = params["--odir"]
-        self.id = params["--name"]
+    def __init__(self, idir="./", odir="output/", name="obj", initial_guess="", kwd=20., kwg=10., noise=10.):
+        self.idir = idir
+        self.odir = odir
+        self.id = name
 
-        self.initial_guess = params["--template"]
-        self.p_kernel_width_deformation = params["--kwd"]
-        self.p_kernel_width_geometry = params["--kwg"]
-        self.p_noise = params["--noise"]
+        self.initial_guess = initial_guess
+        self.p_kernel_width_deformation = kwd
+        self.p_kernel_width_geometry = kwg
+        self.p_noise = noise
 
         self.dataset_xml = ""
 
@@ -71,7 +71,6 @@ class DeformetricaAtlasEstimation():
             lf.sort()
 
         return lf
-
 
     def check_initialisation(self):
         """ check that the input paths exist """
@@ -134,7 +133,7 @@ class DeformetricaAtlasEstimation():
     def estimate(self):
         """ estimate atlas """
         # check and ask for good initialization
-        self.check_initialisation()
+
         self.create_dataset_xml()
 
         # General parameters
@@ -177,7 +176,6 @@ class DeformetricaAtlasEstimation():
         or output from pca using save_eigv
         """
 
-
         # General parameters
         xml_parameters = deformetrica.XmlParameters()
         xml_parameters._read_optimization_parameters_xml(self.optimization_parameters_xml)
@@ -212,3 +210,51 @@ class DeformetricaAtlasEstimation():
 
         from ssm_pca import rename_df2pv
         rename_df2pv(odir + "Shooting__GeodesicFlow__" + self.id)
+
+
+    def registration(self, fv, odir, subject_id="subj"):
+        """
+        register a (new) subject to the template
+        do not require: idir, initial_guess
+        """
+
+        # General parameters
+        xml_parameters = deformetrica.XmlParameters()
+        xml_parameters._read_optimization_parameters_xml(self.optimization_parameters_xml)
+        xml_parameters._read_model_xml(self.model_xml)
+
+        xml_parameters.model_type = "registration"
+        xml_parameters.initial_control_points = os.path.normpath(
+        os.path.join(self.odir, "output/DeterministicAtlas__EstimatedParameters__ControlPoints.txt"))
+        xml_parameters.freeze_control_points = True
+
+        # Template
+        template_object = xml_parameters._initialize_template_object_xml_parameters()
+        template_object['deformable_object_type'] = "surfacemesh"
+        template_object['attachment_type'] = "current"
+        template_object['kernel_type'] = 'torch'
+        template_object ['kernel_device'] = 'gpu'
+        template_object['noise_std'] =  self.p_noise
+        template_object['kernel_width'] = self.p_kernel_width_geometry
+
+        template_object['filename'] = os.path.normpath(
+            os.path.join(self.odir, "output/DeterministicAtlas__EstimatedParameters__Template_"+self.id+".vtk"))
+        xml_parameters.template_specifications[self.id] = template_object
+
+        # Deformation parameters
+        xml_parameters.deformation_kernel_width = self.p_kernel_width_deformation
+
+        # Dataset
+        dataset_specifications = {}
+        dataset_specifications['visit_ages'] = [[]]
+        dataset_specifications['dataset_filenames'] = [[{self.id:fv}]]
+        dataset_specifications['subject_ids'] = [subject_id]
+
+        ## Estimation
+        Deformetrica = deformetrica.api.Deformetrica(output_dir=odir, verbosity="DEBUG")
+
+        Deformetrica.estimate_registration(
+            xml_parameters.template_specifications,
+            dataset_specifications,
+            estimator_options=deformetrica.get_estimator_options(xml_parameters),
+            model_options=deformetrica.get_model_options(xml_parameters))
