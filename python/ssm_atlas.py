@@ -277,7 +277,7 @@ class DeformetricaAtlasEstimation():
         x : np.array N, 3,  coordinates
         """
 
-        kern = kernel_factory.factory("torch", gpu_mode=True, kernel_width=self.kw)
+        kern = kernel_factory.factory("torch", gpu_mode=True, kernel_width=self.kwd)
 
         a_cp = np.loadtxt(self.odir + "output/DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
         assert a_cp.shape == m.shape
@@ -291,7 +291,7 @@ class DeformetricaAtlasEstimation():
 
     def read_template(self):
         """ return polydata of the template """
-        ft = self.idir + "DeterministicAtlas__EstimatedParameters__Template_{}.vtk".format(self.id)
+        ft = self.odir + "output/DeterministicAtlas__EstimatedParameters__Template_{}.vtk".format(self.id)
         ft = os.path.abspath(ft).encode()
 
         reader = vtk.vtkPolyDataReader()
@@ -299,6 +299,13 @@ class DeformetricaAtlasEstimation():
         reader.Update()
         v_pd = reader.GetOutput()
         return v_pd
+
+    def save_controlpoints_vtk(self):
+        """ save controlpoints (could add some momenta) as vtk point cloud """
+        self.ctrlpts = np.loadtxt(self.odir + "output/DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
+        vtkp = ssm_tools.controlpoints_to_vtkPoints(self.ctrlpts)
+        fv = os.path.normpath(os.path.join(self.odir, "controlpoints.vtk"))
+        ssm_tools.WritePolyData(fv, vtkp)
 
     def render_momenta_norm(self, moments):
         """ render the norm of the momenta on the template geometry """

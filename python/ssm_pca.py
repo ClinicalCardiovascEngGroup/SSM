@@ -35,17 +35,15 @@ logging.getLogger('matplotlib.font_manager').disabled = True
 ################################################################################
 ##  Deformetrica outputs data class
 
-class DeformetricaAtlasOutput():
+class DeformetricaAtlasPCA():
     """ result of an DeterministicAtlas estimation """
 
-    def __init__(self, idir="", odir="", kw=None):
+    def __init__(self, idir, odir):
         self.idir = idir
         self.odir = odir
         self.momenta = None
-        self.ctrlpts = None
-        self.kw = kw
 
-        if odir != "":
+        if not os.path.exists(odir):
             sp.call(["mkdir", "-p", self.odir])
 
     def read_momenta(self):
@@ -56,8 +54,6 @@ class DeformetricaAtlasOutput():
         shape = a_momenta[0,:].astype("int")
         self.momenta = a_momenta[1:, :].reshape(shape)
         print("subjects, control_points, dim:", self.momenta.shape)
-
-        self.ctrlpts = np.loadtxt(self.idir + "DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
 
         return self.momenta
 
@@ -141,7 +137,8 @@ class DeformetricaAtlasOutput():
         fv = os.path.normpath(os.path.join(self.odir, "mode{}.txt".format(k)))
         np.savetxt(fv, A, fmt="%.6f")
 
-        vtkp = ssm_tools.controlpoints_to_vtkPoints(self.ctrlpts, A)
+        ctrlpts = np.loadtxt(self.idir + "DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
+        vtkp = ssm_tools.controlpoints_to_vtkPoints(ctrlpts, A)
         fv = os.path.normpath(os.path.join(self.odir, "mode{}.vtk".format(k)))
         ssm_tools.WritePolyData(fv, vtkp)
 

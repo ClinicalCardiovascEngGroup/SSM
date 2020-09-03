@@ -73,12 +73,9 @@ if __name__ == "__main__":
     ae.estimate()
 
 
-    ao = ssm_pca.DeformetricaAtlasOutput(
+    ao = ssm_pca.DeformetricaAtlasPCA(
         idir = ae.odir + "output/",
         odir = ae.odir + "pca/")
-
-    ao.kw = ae.p_kernel_width_deformation
-
     ao.compute_pca(with_plots=True)
 
     ae.shooting(ao.save_eigv(0), ae.odir + "pca/shoot0/")
