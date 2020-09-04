@@ -167,7 +167,7 @@ class DeformetricaAtlasPCA():
         if with_controlpoints:
             ctrlpts = np.loadtxt(self.idir + "DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
             vtkp = ssm_tools.controlpoints_to_vtkPoints(ctrlpts, A)
-            fv = os.path.normpath(os.path.join(self.odir, "mode{}.vtk".format(k)))
-            ssm_tools.WritePolyData(fv, vtkp)
+            fu = os.path.normpath(os.path.join(self.odir, "mode{}.vtk".format(k)))
+            ssm_tools.WritePolyData(fu, vtkp)
 
         return fv

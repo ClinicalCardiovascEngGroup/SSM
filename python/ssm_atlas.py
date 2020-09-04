@@ -36,7 +36,7 @@ import support.kernels as kernel_factory
 
 
 import create_data_set_xml
-
+import visualization_tools
 
 
 import logging
@@ -216,8 +216,7 @@ class DeformetricaAtlasEstimation():
         Deformetrica.compute_shooting(xml_parameters.template_specifications,
                 model_options=deformetrica.get_model_options(xml_parameters))
 
-        from ssm_pca import rename_df2pv
-        rename_df2pv(odir + "Shooting__GeodesicFlow__" + self.id)
+        visualization_tools.rename_df2pv(odir + "Shooting__GeodesicFlow__" + self.id)
 
 
     def registration(self, fmesh, odir, subject_id="subj"):
@@ -328,5 +327,5 @@ class DeformetricaAtlasEstimation():
         v_pd.GetPointData().SetScalars(scalars)
 
         # render
-        import visualization_tools
+
         visualization_tools.renderVtkPolyData(v_pd, vmin=0., vmax=d.max())
