@@ -113,7 +113,7 @@ class DeformetricaAtlasEstimation():
 
         try:
             k = int(self.initial_guess)
-            self.initial_guess = self.get_path_initial_guess(k)
+            self.initial_guess = self.get_path_data(k)
         except ValueError:
             pass
 
@@ -125,7 +125,7 @@ class DeformetricaAtlasEstimation():
         self.p_kernel_width_deformation =  __get_input_float('Set kernel width deformation: ', self.p_kernel_width_deformation)
         self.p_noise =  __get_input_float('Set noise level: ', self.p_noise)
 
-    def get_path_initial_guess(self, k):
+    def get_path_data(self, k):
         """ path of data of subject k """
         lf = self.__get_list_vtk(sorted=True)
         return lf[k]
@@ -181,7 +181,7 @@ class DeformetricaAtlasEstimation():
         """
         warp Atlas using momenta in fv
         interesting momenta are in DeterministicAtlas__EstimatedParameters__Momenta.txt
-        or output from pca using save_eigv
+        or given by pca using save_eigv
         """
 
         # General parameters
@@ -220,7 +220,7 @@ class DeformetricaAtlasEstimation():
         rename_df2pv(odir + "Shooting__GeodesicFlow__" + self.id)
 
 
-    def registration(self, fv, odir, subject_id="subj"):
+    def registration(self, fmesh, odir, subject_id="subj"):
         """
         register a (new) subject to the template
         do not require: idir, initial_guess
@@ -255,7 +255,7 @@ class DeformetricaAtlasEstimation():
         # Dataset
         dataset_specifications = {}
         dataset_specifications['visit_ages'] = [[]]
-        dataset_specifications['dataset_filenames'] = [[{self.id:fv}]]
+        dataset_specifications['dataset_filenames'] = [[{self.id:fmesh}]]
         dataset_specifications['subject_ids'] = [subject_id]
 
         ## Estimation
@@ -302,8 +302,8 @@ class DeformetricaAtlasEstimation():
 
     def save_controlpoints_vtk(self):
         """ save controlpoints (could add some momenta) as vtk point cloud """
-        self.ctrlpts = np.loadtxt(self.odir + "output/DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
-        vtkp = ssm_tools.controlpoints_to_vtkPoints(self.ctrlpts)
+        ctrlpts = np.loadtxt(self.odir + "output/DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
+        vtkp = ssm_tools.controlpoints_to_vtkPoints(ctrlpts)
         fv = os.path.normpath(os.path.join(self.odir, "controlpoints.vtk"))
         ssm_tools.WritePolyData(fv, vtkp)
 
