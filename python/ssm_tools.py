@@ -26,32 +26,6 @@ import affine_deformation_landmarks
 ################################################################################
 ##  numpy, vtk, landmarks
 
-def read_landmarks_as_vtkPoints(ldm_file, img_file):
-    """
-    read and convert a (3,n) array to vtkPoints
-    the img_file is used to compute real world coordinates
-    """
-    ldm = affine_deformation_landmarks.get_landmarks_world(ldm_file, img_file)
-    vldm = vtk.util.numpy_support.numpy_to_vtk(ldm.T)
-    points = vtk.vtkPoints()
-    points.SetData(vldm)
-    return points
-
-
-def vtkmatrix4x4_to_numpy(matrix):
-    """
-    Copies the elements of a vtkMatrix4x4 into a numpy array.
-    """
-    m = np.zeros((4, 4))
-    for i in range(4):
-        for j in range(4):
-            m[i, j] = matrix.GetElement(i, j)
-    return m
-
-
-
-
-
 def controlpoints_to_vtkPoints(cp, mt=None):
     """
     convert control points array given by deformetrica to a vtk point cloud
@@ -85,11 +59,6 @@ def controlpoints_to_vtkPoints_files(cpt_file, vtk_file, mmt_file=None):
 ################################################################################
 ##  IO
 
-def ReadPolyDataSTL(file_name):
-    print("ReadPolyDataSTL obsolete")
-    return ReadPolyData(file_name)
-
-
 def ReadPolyData(file_name):
     """ read a polydata from a .vtk or .stl file """
     if file_name[-4:] == ".stl":
@@ -117,17 +86,6 @@ def WritePolyData(file_name, pd):
     wr.SetFileName(file_name)
     wr.SetInputData(pd)
     return wr.Update()
-
-
-def WritePolyDataSTL(file_name, pd):
-    print("WritePolyDataSTL obsolete")
-    WritePolyData(file_name, pd)
-def WritePolyDataVTK(file_name, pd):
-    print("WritePolyDataVTK obsolete")
-    WritePolyData(file_name, pd)
-def WritePolyDataVTP(file_name, pc):
-    print("WritePolyDataVTP obsolete")
-    WritePolyData(file_name, pd)
 
 
 ################################################################################
@@ -259,32 +217,3 @@ def apply_transform(transform, mesh):
     warper.SetInputData(mesh)
     warper.Update()
     return warper.GetOutput()
-
-
-
-################################################################################
-##  Atlas estimation
-
-def ProcrustesAlignmentFilter(lpd, ):
-    """
-    NOT WORKING
-    vtk.vtkProcrustesAlignmentFilter() work on point-2-point matching meshes
-    we need to implement our own.
-    """
-
-    A = vtkmatrix4x4_to_numpy(transform.GetLandmarkTransform().GetMatrix())
-    scipy.linalg.logm(A)
-    group = vtk.vtkMultiBlockDataGroupFilter()
-    for pd in lpd:
-        group.AddInputData(pd)
-    group.Update()
-
-    transform = vtk.vtkProcrustesAlignmentFilter()
-    transform.SetInputConnection(group.GetOutputPort())
-    transform.GetLandmarkTransform().SetModeToSimilarity()
-    #transform.SetMaximumNumberOfIterations(10)
-    #transform.SetMaximumNumberOfLandmarks(100)
-    transform.SetStartFromCentroid(True)
-    transform.DebugOn()
-    transform.Update()
-    return transform
