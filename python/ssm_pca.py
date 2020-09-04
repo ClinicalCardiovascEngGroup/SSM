@@ -80,7 +80,7 @@ class DeformetricaAtlasPCA():
             self.plot_pca_inertia()
             self.plot_pca_projection()
 
-    def plot_pca_inertia(self):
+    def plot_pca_inertia(self, save_fig=True):
         """ plot inertia and cumulative variance of pca modes """
 
         matplotlib.rcParams.update({'font.size': 16})
@@ -100,10 +100,11 @@ class DeformetricaAtlasPCA():
         ax2.set_title("Cumulative variance")
         ax2.grid(True)
 
-        fig.savefig(self.odir + "fig_pca_inertia.png")
+        if save_fig:
+            fig.savefig(self.odir + "fig_pca_inertia.png")
         return fig
 
-    def plot_pca_projection(self):
+    def plot_pca_projection(self, save_fig=True):
         """ plot projection along the 4 first axes """
 
         matplotlib.rcParams.update({'font.size': 16})
@@ -122,7 +123,33 @@ class DeformetricaAtlasPCA():
         ax1.grid(True)
         ax1.axis('equal')
 
-        fig.savefig(self.odir + "fig_pca_projection.png")
+        if save_fig:
+            fig.savefig(self.odir + "fig_pca_projection.png")
+        return fig
+
+    def project_subject_on_pca(self, x):
+        """
+        project subjects (momentum) on pca axes
+        x (n, mdim), mdim=nctrl*3 or momenta file
+        """
+        if isinstance(x, str):
+            m = np.loadtxt(x)
+            shape = m[0,:].astype("int")
+            x = m[1:, :].reshape((shape[0], shape[1]*shape[2]))
+
+        elif x.ndim == 3:
+            x = x.reshape((x.shape[0], x.shape[1]*x.shape[2]))
+        elif x.ndim == 1:
+            x = x.reshape((1, x.size))
+
+        y = x @ self.pca_v.T
+
+        fig = self.plot_pca_projection(save_fig=False)
+        ax0, ax1 = fig.axes
+
+        ax0.plot(y[:, 0], y[:, 1], "+", ms=12, color="C1")
+        ax1.plot(y[:, 2], y[:, 3], "+", ms=12, color="C1")
+
         return fig
 
     def get_eigv(self, k):
@@ -131,15 +158,16 @@ class DeformetricaAtlasPCA():
         A = self.pca_u[:,k].std() * self.pca_s[k] * self.pca_v[k,:].reshape(ncp, 3)
         return A
 
-    def save_eigv(self, k):
+    def save_eigv(self, k, with_controlpoints=False):
         """ write momemta for the specified axis """
         A = self.get_eigv(k)
         fv = os.path.normpath(os.path.join(self.odir, "mode{}.txt".format(k)))
         np.savetxt(fv, A, fmt="%.6f")
 
-        ctrlpts = np.loadtxt(self.idir + "DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
-        vtkp = ssm_tools.controlpoints_to_vtkPoints(ctrlpts, A)
-        fv = os.path.normpath(os.path.join(self.odir, "mode{}.vtk".format(k)))
-        ssm_tools.WritePolyData(fv, vtkp)
+        if with_controlpoints:
+            ctrlpts = np.loadtxt(self.idir + "DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
+            vtkp = ssm_tools.controlpoints_to_vtkPoints(ctrlpts, A)
+            fv = os.path.normpath(os.path.join(self.odir, "mode{}.vtk".format(k)))
+            ssm_tools.WritePolyData(fv, vtkp)
 
         return fv

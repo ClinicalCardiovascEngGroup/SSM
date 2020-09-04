@@ -69,16 +69,27 @@ if __name__ == "__main__":
         kwg=params["--kwg"],
         noise=params["--noise"])
 
+    # Atlas estimation
     ae.check_initialisation()
     ae.estimate()
 
-
+    # PCA
     ao = ssm_pca.DeformetricaAtlasPCA(
         idir = ae.odir + "output/",
         odir = ae.odir + "pca/")
     ao.compute_pca(with_plots=True)
+    f0 = ao.save_eigv(0, with_controlpoints=True)
+    f1 = ao.save_eigv(1, with_controlpoints=True)
 
-    ae.shooting(ao.save_eigv(0), ae.odir + "pca/shoot0/")
-    ae.shooting(ao.save_eigv(1), ae.odir + "pca/shoot1/")
+    # Registering a new subject
+    fmesh = ae.get_path_data(0)
+    ae.registration(fmesh, ae.odir + "registration/", subject_id="subj")
 
-    ae.render_momenta_norm(ao.get_eigv(1))
+    fmomenta = ae.odir + "registration/DeterministicAtlas__EstimatedParameters__Momenta.txt"
+    fig = ao.project_subject_on_pca(fmomenta)
+
+
+    # Visualisation of the PCA modes on template
+    ae.shooting(f0, ae.odir + "pca/shoot0/")
+    ae.shooting(f1, ae.odir + "pca/shoot1/")
+    ae.render_momenta_norm(ao.get_eigv(0))
