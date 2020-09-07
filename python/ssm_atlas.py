@@ -57,7 +57,11 @@ class DeformetricaAtlasEstimation():
         self.odir = odir
         self.id = name
 
-        self.initial_guess = initial_guess
+        if isinstance(initial_guess, int):
+            self.initial_guess = self.get_path_data(initial_guess)
+        else:
+            self.initial_guess = initial_guess
+
         self.p_kernel_width_deformation = kwd
         self.p_kernel_width_geometry = kwg
         self.p_noise = noise
@@ -142,6 +146,7 @@ class DeformetricaAtlasEstimation():
         """ estimate atlas """
         # check and ask for good initialization
 
+        sp.call(["mkdir", "-p", self.odir])
         self.create_dataset_xml()
 
         # General parameters
@@ -265,6 +270,68 @@ class DeformetricaAtlasEstimation():
             dataset_specifications,
             estimator_options=deformetrica.get_estimator_options(xml_parameters),
             model_options=deformetrica.get_model_options(xml_parameters))
+
+
+    def momenta_from_sbj_to_atlas(self, sbj, odir, do_warpback=False):
+        """
+        forward-backward shooting to invert the atlas-subject deformation
+        sbj         subject id (int)
+
+        return file_moment, file_ctrlpts
+        """
+        sp.call(["mkdir", "-p", odir])
+        ipfx = self.odir + "output/DeterministicAtlas__EstimatedParameters__"
+
+        # moment
+        from ssm_tools import load_momenta
+        m = load_momenta(ipfx + "Momenta.txt")
+        np.savetxt(odir + "forward_momenta.txt", m[sbj, :, :])
+
+        # forward to get end momenta
+        template_specifications = {
+            self.id: {'deformable_object_type': 'surfacemesh',
+            'noise_std': self.p_noise,
+            'filename': ipfx + "Template_" + self.id +".vtk"}
+        }
+        model_options={
+                    'dimension': 3,
+                    'deformation_kernel_type': 'torch',
+                    'deformation_kernel_width': self.p_kernel_width_deformation,
+                    'tmin':0,
+                    'tmax':1,
+                    "initial_control_points": ipfx + "ControlPoints.txt",
+                    "initial_momenta": odir + "forward_momenta.txt"}
+
+        Deformetrica = deformetrica.api.Deformetrica(verbosity="INFO", output_dir=odir + "forward/")
+        Deformetrica.compute_shooting(template_specifications, model_options=model_options)
+
+        # backward setting (shoot similarly)
+        m = np.loadtxt(odir + "forward/Shooting__GeodesicFlow__Momenta__tp_10__age_1.00.txt")
+        np.savetxt(odir + "backward_momenta.txt", -m)
+        sp.call(["cp", odir + "forward/Shooting__GeodesicFlow__ControlPoints__tp_10__age_1.00.txt", odir + "backward_ctrlpts.txt"])
+
+        # backward shooting (could be manually applied to other meshes!)
+        if do_warpback:
+            template_specifications = {
+                self.id: {'deformable_object_type': 'surfacemesh',
+                'noise_std': self.p_noise,
+                'filename': self.get_path_data(sbj)}
+            }
+            model_options={
+                'dimension': 3,
+                'deformation_kernel_type': 'torch',
+                'deformation_kernel_width': self.p_kernel_width_deformation,
+                'tmin':0,
+                'tmax':1,
+                "initial_control_points": odir +  "backward_ctrlpts.txt",
+                "initial_momenta": odir + "backward_momenta.txt"}
+
+            Deformetrica = deformetrica.api.Deformetrica(verbosity="INFO", output_dir=odir + "backward/")
+            Deformetrica.compute_shooting(template_specifications, model_options=model_options)
+
+
+
+        return odir + "backward_momenta.txt", odir +  "backward_ctrlpts.txt"
 
 
     def convolve_momentum(self, m, x):
