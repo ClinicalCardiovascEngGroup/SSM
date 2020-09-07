@@ -9,7 +9,6 @@ Atlas estimation using deformetrica
 - Atlas construction (similitud)
 - Deformetrica atlas construction (diffeomorphic)
 
-
 """
 
 import subprocess as sp
@@ -55,6 +54,13 @@ def controlpoints_to_vtkPoints_files(cpt_file, vtk_file, mmt_file=None):
         mt = None
     pd = controlpoints_to_vtkPoints(cp, mt)
     WritePolyData(vtk_file, pd)
+
+def load_momenta(fi):
+    a = np.loadtxt(fi)
+    shape = a[0, :]
+    b = a[1:, :].reshape(shape.astype("int"))
+    return b
+
 
 ################################################################################
 ##  IO
