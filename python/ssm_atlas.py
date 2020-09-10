@@ -84,6 +84,20 @@ class DeformetricaAtlasEstimation():
 
         return lf
 
+    def save_parameters(self):
+        """ printing parameters in a json for future use if need be """
+        import json
+        d = {"idir":self.idir,
+            "odir":self.odir,
+            "name":self.id,
+            "init":self.initial_guess,
+            "kwd":self.p_kernel_width_deformation,
+            "kwg":self.p_kernel_width_geometry,
+            "noise":self.p_noise
+            }
+        with open(self.odir + "params.json", "w") as fd:
+            json.dump(d, fd, indent=2)
+
     def check_initialisation(self):
         """ check that the input paths exist """
 
