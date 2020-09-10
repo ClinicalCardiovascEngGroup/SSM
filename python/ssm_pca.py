@@ -104,20 +104,27 @@ class DeformetricaAtlasPCA():
             fig.savefig(self.odir + "fig_pca_inertia.png")
         return fig
 
-    def plot_pca_projection(self, save_fig=True):
+    def plot_pca_projection(self, save_fig=True, color=None):
         """ plot projection along the 4 first axes """
 
         matplotlib.rcParams.update({'font.size': 16})
 
         fig, (ax0,ax1) = plt.subplots(1,2, figsize=(14, 6))
 
-        ax0.plot(self.pca_s[0]*self.pca_u[:, 0], self.pca_s[1]*self.pca_u[:, 1], ".", ms=7)
+        if color is None:
+            ax0.plot(self.pca_s[0]*self.pca_u[:, 0], self.pca_s[1]*self.pca_u[:, 1], ".", ms=7)
+            ax1.plot(self.pca_s[2]*self.pca_u[:, 2], self.pca_s[3]*self.pca_u[:, 3], ".", ms=7)
+        else:
+            mp = ax0.scatter(self.pca_s[0]*self.pca_u[:, 0], self.pca_s[1]*self.pca_u[:, 1], c=color, s=30)
+            mp = ax1.scatter(self.pca_s[2]*self.pca_u[:, 2], self.pca_s[3]*self.pca_u[:, 3], c=color, s=30)
+            plt.colorbar(mp)
+
         ax0.set_xlabel("eig0")
         ax0.set_ylabel("eig1")
         ax0.grid(True)
         ax0.axis('equal')
 
-        ax1.plot(self.pca_s[2]*self.pca_u[:, 2], self.pca_s[3]*self.pca_u[:, 3], ".", ms=7)
+
         ax1.set_xlabel("eig2")
         ax1.set_ylabel("eig3")
         ax1.grid(True)
