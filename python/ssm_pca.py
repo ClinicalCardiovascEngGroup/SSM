@@ -54,7 +54,6 @@ class DeformetricaAtlasPCA():
         shape = a_momenta[0,:].astype("int")
         self.momenta = a_momenta[1:, :].reshape(shape)
         print("subjects, control_points, dim:", self.momenta.shape)
-
         return self.momenta
 
     def central_point(self):
@@ -69,7 +68,9 @@ class DeformetricaAtlasPCA():
 
     def compute_pca(self, with_plots=True):
         """ M == U @ S @ V """
-        self.read_momenta()
+
+        if self.momenta is None:
+            self.read_momenta()
 
         nsbj = self.momenta.shape[0]
         ndim = self.momenta.shape[1] * self.momenta.shape[2]
@@ -96,7 +97,8 @@ class DeformetricaAtlasPCA():
         ax1.grid(True)
         ax1.set_yscale("log", nonposy='mask')
 
-        ax2.plot((self.pca_s**2).cumsum()/(self.pca_s**2).sum(), "+-", linewidth=3, markersize=8)
+
+        ax2.plot(np.concatenate((np.zeros(1), (self.pca_s**2).cumsum()/(self.pca_s**2).sum())), "+-", linewidth=3, markersize=8)
         ax2.set_title("Cumulative variance")
         ax2.grid(True)
 
@@ -104,31 +106,55 @@ class DeformetricaAtlasPCA():
             fig.savefig(self.odir + "fig_pca_inertia.png")
         return fig
 
-    def plot_pca_projection(self, save_fig=True, color=None):
+    def plot_pca_projection(self, axes=(0,1,2,3), save_fig=True, color=None, labels=None, nmaxlabels=100):
         """ plot projection along the 4 first axes """
 
         matplotlib.rcParams.update({'font.size': 16})
 
         fig, (ax0,ax1) = plt.subplots(1,2, figsize=(14, 6))
 
+        x1 = self.pca_s[axes[0]]*self.pca_u[:, axes[0]]
+        y1 = self.pca_s[axes[1]]*self.pca_u[:, axes[1]]
+        x2 = self.pca_s[axes[2]]*self.pca_u[:, axes[2]]
+        y2 = self.pca_s[axes[3]]*self.pca_u[:, axes[3]]
+
         if color is None:
-            ax0.plot(self.pca_s[0]*self.pca_u[:, 0], self.pca_s[1]*self.pca_u[:, 1], ".", ms=7)
-            ax1.plot(self.pca_s[2]*self.pca_u[:, 2], self.pca_s[3]*self.pca_u[:, 3], ".", ms=7)
+            ax0.plot(x1, y1, ".", ms=7)
+            ax1.plot(x2, y2, ".", ms=7)
         else:
-            mp = ax0.scatter(self.pca_s[0]*self.pca_u[:, 0], self.pca_s[1]*self.pca_u[:, 1], c=color, s=30)
-            mp = ax1.scatter(self.pca_s[2]*self.pca_u[:, 2], self.pca_s[3]*self.pca_u[:, 3], c=color, s=30)
+            mp = ax0.scatter(x1, y1, c=color, s=30)
+            mp = ax1.scatter(x2, y2, c=color, s=30)
             plt.colorbar(mp)
 
-        ax0.set_xlabel("eig0")
-        ax0.set_ylabel("eig1")
+        if labels:
+            N = self.pca_u.shape[0]
+            if isinstance(labels, bool):
+                labels = [str(i) for i in range(N)]
+            assert (len(labels) == N)
+
+            d1 = (x1**2 + y1**2)
+            d2 = (x2**2 + y2**2)
+            k = max(0, N - 1 - nmaxlabels)
+            t1 = np.sort(d1)[k]
+            t2 = np.sort(d2)[k]
+
+            for i in range(N):
+                if d1[i]>t1:
+                    ax0.text(x1[i], y1[i], labels[i])
+                if d2[i]>t2:
+                    ax1.text(x2[i], y2[i], labels[i])
+
+
+        ax0.set_xlabel("eig{}".format(axes[0]))
+        ax0.set_ylabel("eig{}".format(axes[1]))
         ax0.grid(True)
         ax0.axis('equal')
 
-
-        ax1.set_xlabel("eig2")
-        ax1.set_ylabel("eig3")
+        ax1.set_xlabel("eig{}".format(axes[2]))
+        ax1.set_ylabel("eig{}".format(axes[3]))
         ax1.grid(True)
         ax1.axis('equal')
+
 
         if save_fig:
             fig.savefig(self.odir + "fig_pca_projection.png")
@@ -143,7 +169,6 @@ class DeformetricaAtlasPCA():
             m = np.loadtxt(x)
             shape = m[0,:].astype("int")
             x = m[1:, :].reshape((shape[0], shape[1]*shape[2]))
-
         elif x.ndim == 3:
             x = x.reshape((x.shape[0], x.shape[1]*x.shape[2]))
         elif x.ndim == 1:

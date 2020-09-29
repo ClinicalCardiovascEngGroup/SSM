@@ -30,7 +30,7 @@ or command line parameters. Run `python main_ssm.py -h`
 * `ssm_atlas.py` implements the `DeformetricaAtlasEstimation` class to interface
 with Deformetrica API
 
-* `ssm_pca.py` implements the `DeformetricaAtlasOutput` class for visualization purposes
+* `ssm_pca.py` implements the `DeformetricaAtlasOutput` class for PCA estimation
 
 * `ssm_tools.py` gives simpler functions to pre-process the meshes
 
