@@ -29,6 +29,8 @@ def controlpoints_to_vtkPoints(cp, mt=None):
     """
     convert control points array given by deformetrica to a vtk point cloud
     if momenta are given add vector data to points
+    cp (k, 3)
+    mt (k, d)
     """
     vldm = vtk.util.numpy_support.numpy_to_vtk(cp)
     points = vtk.vtkPoints()
@@ -39,7 +41,10 @@ def controlpoints_to_vtkPoints(cp, mt=None):
 
     if mt is not None:
         vmt = vtk.util.numpy_support.numpy_to_vtk(mt)
-        pd.GetPointData().SetVectors(vmt)
+        if mt.ndim == 1 or mt.shape[1] == 1:
+            pd.GetPointData().SetScalars(vmt)
+        else:
+            pd.GetPointData().SetVectors(vmt)
 
     return pd
 
@@ -60,6 +65,17 @@ def load_momenta(fi):
     shape = a[0, :]
     b = a[1:, :].reshape(shape.astype("int"))
     return b
+
+def read_landmarks_as_vtkPoints(ldm_file, img_file):
+    """
+    read and convert a (3,n) array to vtkPoints
+    the img_file is used to compute real world coordinates
+    """
+    ldm = affine_deformation_landmarks.get_landmarks_world(ldm_file, img_file)
+    vldm = vtk.util.numpy_support.numpy_to_vtk(ldm.T)
+    points = vtk.vtkPoints()
+    points.SetData(vldm)
+    return points
 
 
 ################################################################################
