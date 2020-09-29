@@ -13,7 +13,7 @@ deformetrica estimate model.xml data-set.xml -p optimization_parameters.xml
 import subprocess as sp
 import os, sys
 import glob
-
+import json
 
 # to enable built in directory tab completion with raw_input():
 import readline
@@ -86,7 +86,6 @@ class DeformetricaAtlasEstimation():
 
     def save_parameters(self):
         """ printing parameters in a json for future use if need be """
-        import json
         d = {"idir":self.idir,
             "odir":self.odir,
             "name":self.id,
@@ -97,6 +96,20 @@ class DeformetricaAtlasEstimation():
             }
         with open(self.odir + "params.json", "w") as fd:
             json.dump(d, fd, indent=2)
+
+    def load_parameters(self, fjson):
+        """loading parameters from a json"""
+        with open(fjson, "r") as fd:
+            d = json.load(fd)
+            print("loading parameters: ", d)
+            self.idir = d["idir"]
+            self.odir = d["odir"]
+            self.id = d["name"]
+            self.initial_guess = d["init"]
+            self.p_kernel_width_deformation = d["kwd"]
+            self.p_kernel_width_geometry = d["kwg"]
+            self.p_noise = d["noise"]
+
 
     def check_initialisation(self):
         """ check that the input paths exist """
@@ -169,8 +182,7 @@ class DeformetricaAtlasEstimation():
         xml_parameters._read_model_xml(self.model_xml)
         xml_parameters._read_dataset_xml(self.dataset_xml)
 
-        # Overwriting main parameters
-        xml_parameters.deformation_kernel_width = self.p_kernel_width_deformation
+
 
         # Template
         template_object = xml_parameters._initialize_template_object_xml_parameters()
@@ -183,7 +195,6 @@ class DeformetricaAtlasEstimation():
         template_object['filename'] = self.initial_guess
         template_object['kernel_width'] = self.p_kernel_width_geometry
         xml_parameters.template_specifications[self.id] = template_object
-
 
         ## Estimation
         # call: deformetrica estimate model.xml dataset.xml -p optimization_parameters.xml
@@ -379,6 +390,15 @@ class DeformetricaAtlasEstimation():
         reader.Update()
         v_pd = reader.GetOutput()
         return v_pd
+
+    def read_momenta(self):
+        """ read the momenta file, first line contain the shape """
+        a_momenta = np.loadtxt(self.odir + "output/DeterministicAtlas__EstimatedParameters__Momenta.txt")
+        shape = a_momenta[0,:].astype("int")
+        return a_momenta[1:, :].reshape(shape)
+
+    def read_ctrlpoints(self):
+        return np.loadtxt(self.odir + "output/DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
 
     def save_controlpoints_vtk(self):
         """ save controlpoints (could add some momenta) as vtk point cloud """
