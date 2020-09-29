@@ -27,6 +27,20 @@ def rename_df2pv(prefix):
         sp.call(["mv", f, prefix + "_tp{:03}.vtk".format(i)])
 
 
+def read_loglikelihood_from_log(flog):
+    """ likehood from deformetrica log file """
+    ll = []
+    with open(flog, "r") as fl:
+        for l in fl:
+            m = re.search("Log-likelihood = ([+-.E\d]+)", l)
+            if m:
+                try:
+                    x = float(m.group(1))
+                    ll.append(x)
+                except ValueError:
+                    print(m)
+    return ll
+
 ################################################################################
 ##  vtk 3D rendering
 
