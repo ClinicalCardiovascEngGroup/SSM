@@ -73,6 +73,8 @@ if __name__ == "__main__":
     ae.check_initialisation()
     ae.estimate()
 
+    sp.call(["paraview", "--data=" + ae.odir + "output/DeterministicAtlas__EstimatedParameters__Template_" + ae.id + ".vtk"])
+
     # PCA
     ao = ssm_pca.DeformetricaAtlasPCA(
         idir = ae.odir + "output/",
@@ -88,8 +90,10 @@ if __name__ == "__main__":
     fmomenta = ae.odir + "registration/DeterministicAtlas__EstimatedParameters__Momenta.txt"
     fig = ao.project_subject_on_pca(fmomenta)
 
-
     # Visualisation of the PCA modes on template
     ae.shooting(f0, ae.odir + "pca/shoot0/")
     ae.shooting(f1, ae.odir + "pca/shoot1/")
+
+    sp.call(["paraview", "--data=" + ae.odir + "pca/shoot0/Shooting__GeodesicFlow__" + ae.id + "_tp..vtk"])
+
     ae.render_momenta_norm(ao.get_eigv(0))
