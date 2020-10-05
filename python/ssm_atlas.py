@@ -181,8 +181,7 @@ class DeformetricaAtlasEstimation():
         xml_parameters._read_optimization_parameters_xml(self.optimization_parameters_xml)
         xml_parameters._read_model_xml(self.model_xml)
         xml_parameters._read_dataset_xml(self.dataset_xml)
-
-
+        xml_parameters.deformation_kernel_width = self.p_kernel_width_deformation
 
         # Template
         template_object = xml_parameters._initialize_template_object_xml_parameters()
@@ -207,7 +206,7 @@ class DeformetricaAtlasEstimation():
             model_options=deformetrica.get_model_options(xml_parameters))
 
 
-    def shooting(self, fv, odir):
+    def shooting(self, fv, odir, tmin=-5, tmax=+5):
         """
         warp Atlas using momenta in fv
         interesting momenta are in DeterministicAtlas__EstimatedParameters__Momenta.txt
@@ -236,8 +235,8 @@ class DeformetricaAtlasEstimation():
         # Deformation parameters
         xml_parameters.deformation_kernel_width = self.p_kernel_width_deformation
         xml_parameters.t0 = 0.
-        xml_parameters.tmin = -5.
-        xml_parameters.tmax = +5.
+        xml_parameters.tmin = tmin
+        xml_parameters.tmax = tmax
 
         ## Shooting
         # call: deformetrica compute model.xml -p optimization_parameters.xml
