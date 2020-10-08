@@ -169,9 +169,18 @@ class DeformetricaAtlasEstimation():
         create_data_set_xml.create_xml_atlas(lf, fxml, self.id)
         self.dataset_xml = fxml
 
-    def estimate(self):
-        """ estimate atlas """
-        # check and ask for good initialization
+    def estimate(self, xml_params=None):
+        """
+        estimate atlas
+        xml_params is a dictionary used to overwrite xml_arameters attributes
+        ex:
+        xml_params = {"memory_length":1, "initial_step_size":1e-4, "freeze_control_points":False, "freeze_control_points":False}
+        ==>
+        xml_parameters.memory_length = 1
+        xml_parameters.initial_step_size = 1e-4
+        xml_parameters.freeze_template = True
+        xml_parameters.freeze_control_points = False
+         """
 
         sp.call(["mkdir", "-p", self.odir])
         self.create_dataset_xml()
@@ -182,6 +191,19 @@ class DeformetricaAtlasEstimation():
         xml_parameters._read_model_xml(self.model_xml)
         xml_parameters._read_dataset_xml(self.dataset_xml)
         xml_parameters.deformation_kernel_width = self.p_kernel_width_deformation
+
+        # Overwriting main parameters
+        if xml_params is None:
+            xml_params == dict()
+        for x in xml_params:
+            try:
+                print("overwriting parameters: ", x, "from: ", getattr(xml_parameters, x), "to: ", xml_params[x])
+                setattr(xml_parameters, x, xml_params[x])
+            except AttributeError as e:
+                print(e)
+                print("no estimation done")
+                return
+
 
         # Template
         template_object = xml_parameters._initialize_template_object_xml_parameters()
