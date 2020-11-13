@@ -106,7 +106,7 @@ class DeformetricaAtlasPCA():
             fig.savefig(self.odir + "fig_pca_inertia.png")
         return fig
 
-    def plot_pca_projection(self, axes=(0,1,2,3), save_fig=True, color=None, labels=None, nmaxlabels=100):
+    def plot_pca_projection(self, axes=(0,1,2,3), save_fig=True, color=None, labels=None, nmaxlabels=100, cmap=None):
         """ plot projection along the 4 first axes """
 
         matplotlib.rcParams.update({'font.size': 16})
@@ -122,8 +122,8 @@ class DeformetricaAtlasPCA():
             ax0.plot(x1, y1, ".", ms=7)
             ax1.plot(x2, y2, ".", ms=7)
         else:
-            mp = ax0.scatter(x1, y1, c=color, s=30)
-            mp = ax1.scatter(x2, y2, c=color, s=30)
+            mp = ax0.scatter(x1, y1, c=color, s=30, cmap=cmap)
+            mp = ax1.scatter(x2, y2, c=color, s=30, cmap=cmap)
             plt.colorbar(mp)
 
         if labels:
@@ -145,13 +145,13 @@ class DeformetricaAtlasPCA():
                     ax1.text(x2[i], y2[i], labels[i])
 
 
-        ax0.set_xlabel("eig{}".format(axes[0]))
-        ax0.set_ylabel("eig{}".format(axes[1]))
+        ax0.set_xlabel("pca ax {}".format(axes[0]))
+        ax0.set_ylabel("pca ax {}".format(axes[1]))
         ax0.grid(True)
         ax0.axis('equal')
 
-        ax1.set_xlabel("eig{}".format(axes[2]))
-        ax1.set_ylabel("eig{}".format(axes[3]))
+        ax1.set_xlabel("pca ax {}".format(axes[2]))
+        ax1.set_ylabel("pca ax {}".format(axes[3]))
         ax1.grid(True)
         ax1.axis('equal')
 
@@ -160,7 +160,7 @@ class DeformetricaAtlasPCA():
             fig.savefig(self.odir + "fig_pca_projection.png")
         return fig
 
-    def project_subject_on_pca(self, x):
+    def project_subject_on_pca(self, x, labels=False):
         """
         project subjects (momentum) on pca axes
         x (n, mdim), mdim=nctrl*3 or momenta file
@@ -182,24 +182,43 @@ class DeformetricaAtlasPCA():
         ax0.plot(y[:, 0], y[:, 1], "+", ms=12, color="C1")
         ax1.plot(y[:, 2], y[:, 3], "+", ms=12, color="C1")
 
+        if labels:
+            N = y.shape[0]
+            if isinstance(labels, bool):
+                labels = [str(i) for i in range(N)]
+            else:
+                assert (len(labels) == N)
+
+            for i in range(y.shape[0]):
+                ax0.text(y[i, 0], y[i, 1], labels[i])
+                ax1.text(y[i, 2], y[i, 3], labels[i])
+
         return fig
 
     def get_eigv(self, k):
-        """ write momemta for the specified axis """
+        """ get momemta for the specified axis """
         ncp = self.momenta.shape[1] # number of control points
         A = self.pca_u[:,k].std() * self.pca_s[k] * self.pca_v[k,:].reshape(ncp, 3)
         return A
 
-    def save_eigv(self, k, with_controlpoints=False):
-        """ write momemta for the specified axis """
+    def save_eigv(self, k, with_controlpoints=False, fout=None):
+        """
+        write momemta for the specified axis
+        with_controlpoints (bool) write a vtk file with points and pointdata (moments)
+        fout (string) file out prefix, append "{k}.txt" (resp. "{k}.vtk")
+        """
+
+        if fout is None:
+            fv = os.path.normpath(os.path.join(self.odir, "mode{}".format(k)))
+        else:
+            fv = os.path.normpath(fout + "{}".format(k))
+
         A = self.get_eigv(k)
-        fv = os.path.normpath(os.path.join(self.odir, "mode{}.txt".format(k)))
-        np.savetxt(fv, A, fmt="%.6f")
+        np.savetxt(fv + ".txt", A, fmt="%.6f")
 
         if with_controlpoints:
             ctrlpts = np.loadtxt(self.idir + "DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
             vtkp = ssm_tools.controlpoints_to_vtkPoints(ctrlpts, A)
-            fu = os.path.normpath(os.path.join(self.odir, "mode{}.vtk".format(k)))
-            ssm_tools.WritePolyData(fu, vtkp)
+            ssm_tools.WritePolyData(fv + ".vtk", vtkp)
 
         return fv
