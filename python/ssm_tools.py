@@ -107,7 +107,20 @@ def WritePolyData(file_name, pd):
 
     wr.SetFileName(file_name)
     wr.SetInputData(pd)
-    return wr.Update()
+
+    try:
+        return wr.Update()
+    except FileNotFoundError as e:
+        odir = os.path.dirname(file_name)
+        if not os.path.exists(odir):
+            sp.call(["mkdir", "-p", odir])
+            print("Directory created:", odir)
+            return wr.Update()
+        else:
+            raise e
+
+def ConvertPolyData(fi, fo):
+    WritePolyData(fo, ReadPolyData(fi))
 
 
 ################################################################################
@@ -128,10 +141,11 @@ def DecimatePolyData(pd, reduction=0.9, ntarget=None):
     triangulate.SetInputData(pd)
     triangulate.Update()
 
-    decimate = vtk.vtkDecimatePro()
+    #decimate = vtk.vtkDecimatePro()
+    decimate = vtk.vtkQuadricDecimation()
     decimate.SetInputData(triangulate.GetOutput())
     decimate.SetTargetReduction(reduction)
-    decimate.PreserveTopologyOff()
+    decimate.PreserveTopologyOn()
     decimate.Update()
 
     decimated = vtk.vtkPolyData()
@@ -144,7 +158,7 @@ def ExtractGeometryZ(pd, nx, ny, nz, z0):
     cut the mesh using z > z0
     could try vtkClipPolyData too
     """
-    filter = vtk.vtkExtractGeometry()
+    filter = vtk.vtkExtractPolyDataGeometry()
 
     function = vtk.vtkPlane()
     function.SetNormal(nx, ny, nz)
@@ -158,13 +172,13 @@ def ExtractGeometryZ(pd, nx, ny, nz, z0):
     filter.SetInputData(triangleFilter.GetOutput())
     filter.Update()
 
-    geometryFilter = vtk.vtkGeometryFilter()
-    geometryFilter.SetInputData(filter.GetOutput())
-    geometryFilter.Update()
+    #geometryFilter = vtk.vtkGeometryFilter()
+    #geometryFilter.SetInputData(filter.GetOutput())
+    #geometryFilter.Update()
 
     connectFilter = vtk.vtkPolyDataConnectivityFilter()
     connectFilter.SetExtractionModeToLargestRegion()
-    connectFilter.SetInputData(geometryFilter.GetOutput())
+    connectFilter.SetInputData(filter.GetOutput())
     connectFilter.Update()
 
     return connectFilter.GetOutput()
