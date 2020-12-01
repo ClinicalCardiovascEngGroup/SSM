@@ -91,8 +91,8 @@ if __name__ == "__main__":
     fig = ao.project_subject_on_pca(fmomenta)
 
     # Visualisation of the PCA modes on template
-    ae.shooting(f0, ae.odir + "pca/shoot0/")
-    ae.shooting(f1, ae.odir + "pca/shoot1/")
+    ae.shooting(f0 + ".txt", ae.odir + "pca/shoot0/")
+    ae.shooting(f1 + ".txt", ae.odir + "pca/shoot1/")
 
     sp.call(["paraview", "--data=" + ae.odir + "pca/shoot0/Shooting__GeodesicFlow__" + ae.id + "_tp..vtk"])
 
