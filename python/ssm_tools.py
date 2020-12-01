@@ -145,7 +145,7 @@ def DecimatePolyData(pd, reduction=0.9, ntarget=None):
     decimate = vtk.vtkQuadricDecimation()
     decimate.SetInputData(triangulate.GetOutput())
     decimate.SetTargetReduction(reduction)
-    decimate.PreserveTopologyOn()
+    #decimate.PreserveTopologyOn()
     decimate.Update()
 
     decimated = vtk.vtkPolyData()
