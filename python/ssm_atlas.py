@@ -120,6 +120,7 @@ class DeformetricaAtlasEstimation():
                 x = input(s + " [{}]: ".format(p))
                 if x == "":
                     x = p
+                x = os.path.abspath(x)
                 if pass_check or os.path.exists(x):
                     return x
                 else:
@@ -194,7 +195,7 @@ class DeformetricaAtlasEstimation():
 
         # Overwriting main parameters
         if xml_params is None:
-            xml_params == dict()
+            xml_params = dict()
         for x in xml_params:
             try:
                 print("overwriting parameters: ", x, "from: ", getattr(xml_parameters, x), "to: ", xml_params[x])
@@ -375,8 +376,6 @@ class DeformetricaAtlasEstimation():
             Deformetrica = deformetrica.api.Deformetrica(verbosity="INFO", output_dir=odir + "backward/")
             Deformetrica.compute_shooting(template_specifications, model_options=model_options)
 
-
-
         return odir + "backward_momenta.txt", odir +  "backward_ctrlpts.txt"
 
 
@@ -389,7 +388,7 @@ class DeformetricaAtlasEstimation():
         x : np.array N, 3,  coordinates
         """
 
-        kern = kernel_factory.factory("torch", gpu_mode=True, kernel_width=self.kwd)
+        kern = kernel_factory.factory("torch", gpu_mode=True, kernel_width=self.p_kernel_width_deformation)
 
         a_cp = np.loadtxt(self.odir + "output/DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
         assert a_cp.shape == m.shape
@@ -421,11 +420,12 @@ class DeformetricaAtlasEstimation():
     def read_ctrlpoints(self):
         return np.loadtxt(self.odir + "output/DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
 
-    def save_controlpoints_vtk(self):
-        """ save controlpoints (could add some momenta) as vtk point cloud """
+    def save_controlpoints_vtk(self, fname="controlpoints.vtk", X=None):
+        """ save controlpoints (could add some momenta X (n, d)) as vtk point cloud """
+        import ssm_tools
         ctrlpts = np.loadtxt(self.odir + "output/DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
-        vtkp = ssm_tools.controlpoints_to_vtkPoints(ctrlpts)
-        fv = os.path.normpath(os.path.join(self.odir, "controlpoints.vtk"))
+        vtkp = ssm_tools.controlpoints_to_vtkPoints(ctrlpts, X)
+        fv = os.path.normpath(os.path.join(self.odir, fname))
         ssm_tools.WritePolyData(fv, vtkp)
 
     def render_momenta_norm(self, moments):
