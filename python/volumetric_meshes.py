@@ -31,6 +31,9 @@ def shoot_vtu(fin, fvtk, fmoments, fctrlpts, odir,  fout, kw, noise, name):
     kw          deformation kernel
     noise       geometric noise (idk what for)
     name        object name (deformetrica)
+
+    the first line of the momenta file should give the number of subjects
+    it is possible to do multiple shooting at once.
     """
 
     sp.call(["mkdir", "-p", odir])
@@ -41,14 +44,11 @@ def shoot_vtu(fin, fvtk, fmoments, fctrlpts, odir,  fout, kw, noise, name):
     reader.SetFileName(fin)
     reader.Update()
     vus = reader.GetOutput()
-    #print(vus)
 
     # writing points as polydata
     vps = vtk.vtkPolyData()
     vps.SetPoints(vus.GetPoints())
     print("shooting N points:", vus.GetNumberOfPoints(), vps.GetNumberOfPoints())
-
-
     writer = vtk.vtkPolyDataWriter()
     writer.SetFileName(fvtk)
     writer.SetInputData(vps)
@@ -70,17 +70,32 @@ def shoot_vtu(fin, fvtk, fmoments, fctrlpts, odir,  fout, kw, noise, name):
     Deformetrica = deformetrica.api.Deformetrica(verbosity="INFO", output_dir=odir)
     Deformetrica.compute_shooting(template_specifications, model_options=model_options)
 
-    # loading deformed points
+    # number of momenta used
+    fm = open(fmoments,"r")
+    l = fm.readline().strip().split(" ")
+    N = int(l[0])
+
+    if N == 1:
+        lshotvtk = [odir + "Shooting__GeodesicFlow__"+name+"__tp_10__age_1.00.vtk"]
+        lfout = [fout]
+    else:
+        lshotvtk = [odir +"Shooting_"+str(i)+"__GeodesicFlow__"+name+"__tp_10__age_1.00.vtk" for i in range(N)]
+        lfout = [fout[:-4] + "_{}.vtu".format(i) for i in range(N)]
+
+    # using connectivity of 'vus' on shot points
     reader = vtk.vtkPolyDataReader()
-    reader.SetFileName(odir + "Shooting__GeodesicFlow__"+name+"__tp_10__age_1.00.vtk")
-    reader.Update()
-    vpsd = reader.GetOutput()
-
-    # modifing points in original unstructured grid
-    vus.SetPoints(vpsd.GetPoints())
-
-    # writing
     writer = vtk.vtkXMLUnstructuredGridWriter()
-    writer.SetFileName(fout)
-    writer.SetInputData(vus)
-    writer.Update()
+    for fv, fo in zip(lshotvtk, lfout):
+
+            # loading deformed points
+            reader.SetFileName(fv)
+            reader.Update()
+            vpsd = reader.GetOutput()
+
+            # modifing points in original unstructured grid
+            vus.SetPoints(vpsd.GetPoints())
+
+            # writing
+            writer.SetFileName(fo)
+            writer.SetInputData(vus)
+            writer.Update()
