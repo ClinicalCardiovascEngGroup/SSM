@@ -22,9 +22,6 @@ readline.parse_and_bind("tab: complete")
 
 import numpy as np
 import scipy, scipy.linalg
-import matplotlib
-import matplotlib.pyplot as plt
-
 import vtk
 from vtk.util import numpy_support as nps
 import torch
@@ -42,10 +39,6 @@ import visualization_tools
 import logging
 logger = logging.getLogger("ssm_atlas")
 logger.setLevel(logging.INFO)
-
-# deformetrica messing with the verbosity level...
-logging.getLogger('matplotlib.font_manager').disabled = True
-
 
 ################################################################################
 ##  Deformetrica estimation class
@@ -170,7 +163,7 @@ class DeformetricaAtlasEstimation():
         create_data_set_xml.create_xml_atlas(lf, fxml, self.id)
         self.dataset_xml = fxml
 
-    def estimate(self, xml_params=None):
+    def estimate(self, xml_params=None, do_keep_all=False):
         """
         estimate atlas
         xml_params is a dictionary used to overwrite xml_arameters attributes
@@ -228,8 +221,12 @@ class DeformetricaAtlasEstimation():
             estimator_options=deformetrica.get_estimator_options(xml_parameters),
             model_options=deformetrica.get_model_options(xml_parameters))
 
+        ## cleaning a bit the deformetrica output
+        if not do_keep_all:
+            sp.call("rm "+odir+"DeterministicAtlas__flow__*.vtk", shell=True)
 
-    def shooting(self, fv, odir, tmin=-5, tmax=+5):
+
+    def shooting(self, fv, odir, tmin=-5, tmax=+5, do_keep_all=False):
         """
         warp Atlas using momenta in fv
         interesting momenta are in DeterministicAtlas__EstimatedParameters__Momenta.txt
@@ -270,6 +267,9 @@ class DeformetricaAtlasEstimation():
 
         visualization_tools.rename_df2pv(odir + "Shooting__GeodesicFlow__" + self.id)
 
+        if not do_keep_all:
+            sp.call("rm "+odir+"Shooting__GeodesicFlow__ControlsPoints__tp*.txt", shell=True)
+            sp.call("rm "+odir+"Shooting__GeodesicFlow__Momenta__tp*.txt", shell=True)
 
     def registration(self, fmesh, odir, subject_id="subj"):
         """
@@ -449,5 +449,4 @@ class DeformetricaAtlasEstimation():
         v_pd.GetPointData().SetScalars(scalars)
 
         # render
-
         visualization_tools.renderVtkPolyData(v_pd, vmin=0., vmax=d.max())
