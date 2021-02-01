@@ -65,7 +65,7 @@ if __name__ == "__main__":
         odir=params["--odir"],
         name=params["--name"],
         initial_guess=params["--template"],
-        kwd=params["--kwg"],
+        kwd=params["--kwd"],
         kwg=params["--kwg"],
         noise=params["--noise"])
 
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     ae.check_initialisation()
     ae.estimate()
 
-    sp.call(["paraview", "--data=" + ae.odir + "output/DeterministicAtlas__EstimatedParameters__Template_" + ae.id + ".vtk"])
+    sp.call(["paraview", "--data=" + ae.odir + "/output/DeterministicAtlas__EstimatedParameters__Template_" + ae.id + ".vtk"])
 
     # PCA
     ao = ssm_pca.DeformetricaAtlasPCA(
