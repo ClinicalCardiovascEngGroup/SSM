@@ -134,9 +134,13 @@ class DeformetricaAtlasPCA():
 
             d1 = (x1**2 + y1**2)
             d2 = (x2**2 + y2**2)
-            k = max(0, N - 1 - nmaxlabels)
-            t1 = np.sort(d1)[k]
-            t2 = np.sort(d2)[k]
+            k = N - 1 - nmaxlabels
+            if k < 0:
+                t1 = -1.
+                t2 = -1.
+            else:
+                t1 = np.sort(d1)[k]
+                t2 = np.sort(d2)[k]
 
             for i in range(N):
                 if d1[i]>t1:
