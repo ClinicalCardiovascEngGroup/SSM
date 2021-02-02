@@ -9,11 +9,12 @@
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>ssm_tools</strong></big></big></font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/face3d/Documents/SSM_matlab_github/python/ssm_tools.py">/home/face3d/Documents/SSM_matlab_github/python/ssm_tools.py</a></font></td></tr></table>
-    <p><tt>Atlas&nbsp;estimation&nbsp;using&nbsp;deformetrica<br>
+    <p><tt>Mesh&nbsp;processing&nbsp;tools&nbsp;(vtk)&nbsp;for&nbsp;atlas&nbsp;estimation<br>
 &nbsp;<br>
--&nbsp;VTK&nbsp;IterativeClosestPoint&nbsp;registration&nbsp;(similitud)<br>
--&nbsp;Atlas&nbsp;construction&nbsp;(similitud)<br>
--&nbsp;Deformetrica&nbsp;atlas&nbsp;construction&nbsp;(diffeomorphic)</tt></p>
+-&nbsp;Read/Write&nbsp;polydata<br>
+-&nbsp;Rigid/similitud&nbsp;registration&nbsp;(using&nbsp;vtkIterativeClosestPoint,&nbsp;vtkTransform)<br>
+-&nbsp;Decimation&nbsp;and&nbsp;clipping<br>
+-&nbsp;numpy&nbsp;array&nbsp;to&nbsp;vtk&nbsp;points</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
@@ -34,7 +35,7 @@
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-ConvertPolyData"><strong>ConvertPolyData</strong></a>(fi, fo)</dt></dl>
+<td width="100%"><dl><dt><a name="-ConvertPolyData"><strong>ConvertPolyData</strong></a>(fi, fo)</dt><dd><tt>"&nbsp;read&nbsp;then&nbsp;write</tt></dd></dl>
  <dl><dt><a name="-DecimatePolyData"><strong>DecimatePolyData</strong></a>(pd, reduction=0.9, ntarget=None)</dt><dd><tt>reduction&nbsp;==&nbsp;0.9&nbsp;=&gt;&nbsp;réduction&nbsp;to&nbsp;10%&nbsp;original&nbsp;size<br>
 if&nbsp;ntarget&nbsp;is&nbsp;not&nbsp;None&nbsp;override&nbsp;reduction&nbsp;factor<br>
 vtkDecimatePro&nbsp;only&nbsp;process&nbsp;triangles&nbsp;we&nbsp;use&nbsp;vtkTriangleFilter&nbsp;first</tt></dd></dl>
@@ -46,13 +47,13 @@ can&nbsp;be&nbsp;initialized&nbsp;using&nbsp;landmarks<br>
  <dl><dt><a name="-LandmarkSimilitudRegistration"><strong>LandmarkSimilitudRegistration</strong></a>(fix, mov)</dt><dd><tt>landmarks&nbsp;registration&nbsp;from&nbsp;two&nbsp;vtkPoints</tt></dd></dl>
  <dl><dt><a name="-ReadPolyData"><strong>ReadPolyData</strong></a>(file_name)</dt><dd><tt>read&nbsp;a&nbsp;polydata&nbsp;from&nbsp;a&nbsp;.vtk&nbsp;or&nbsp;.stl&nbsp;file</tt></dd></dl>
  <dl><dt><a name="-WritePolyData"><strong>WritePolyData</strong></a>(file_name, pd)</dt><dd><tt>write&nbsp;in&nbsp;a&nbsp;.vtk,&nbsp;.stl&nbsp;or&nbsp;.vtp&nbsp;file</tt></dd></dl>
- <dl><dt><a name="-apply_transform"><strong>apply_transform</strong></a>(transform, mesh)</dt></dl>
+ <dl><dt><a name="-apply_transform"><strong>apply_transform</strong></a>(transform, mesh)</dt><dd><tt>call&nbsp;vtkTransformPolyDataFilter</tt></dd></dl>
  <dl><dt><a name="-controlpoints_to_vtkPoints"><strong>controlpoints_to_vtkPoints</strong></a>(cp, mt=None)</dt><dd><tt>convert&nbsp;control&nbsp;points&nbsp;array&nbsp;given&nbsp;by&nbsp;deformetrica&nbsp;to&nbsp;a&nbsp;vtk&nbsp;point&nbsp;cloud<br>
 if&nbsp;momenta&nbsp;are&nbsp;given&nbsp;add&nbsp;vector&nbsp;data&nbsp;to&nbsp;points<br>
 cp&nbsp;(k,&nbsp;3)<br>
 mt&nbsp;(k,&nbsp;d)</tt></dd></dl>
- <dl><dt><a name="-controlpoints_to_vtkPoints_files"><strong>controlpoints_to_vtkPoints_files</strong></a>(cpt_file, vtk_file, mmt_file=None)</dt><dd><tt>same&nbsp;but&nbsp;with&nbsp;read/write</tt></dd></dl>
- <dl><dt><a name="-load_momenta"><strong>load_momenta</strong></a>(fi)</dt></dl>
+ <dl><dt><a name="-controlpoints_to_vtkPoints_files"><strong>controlpoints_to_vtkPoints_files</strong></a>(cpt_file, vtk_file, mmt_file=None)</dt><dd><tt>same&nbsp;than&nbsp;controlpoints_to_vtkPoints&nbsp;but&nbsp;with&nbsp;read/write</tt></dd></dl>
+ <dl><dt><a name="-load_momenta"><strong>load_momenta</strong></a>(fi)</dt><dd><tt>loading&nbsp;momenta&nbsp;from&nbsp;a&nbsp;deformetrica&nbsp;file,&nbsp;1st&nbsp;line&nbsp;=&nbsp;shape</tt></dd></dl>
  <dl><dt><a name="-read_landmarks_as_vtkPoints"><strong>read_landmarks_as_vtkPoints</strong></a>(ldm_file, img_file)</dt><dd><tt>read&nbsp;and&nbsp;convert&nbsp;a&nbsp;(3,n)&nbsp;array&nbsp;to&nbsp;vtkPoints<br>
 the&nbsp;img_file&nbsp;is&nbsp;used&nbsp;to&nbsp;compute&nbsp;real&nbsp;world&nbsp;coordinates</tt></dd></dl>
 </td></tr></table>

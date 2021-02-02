@@ -119,7 +119,7 @@ def WritePolyData(file_name, pd):
             raise e
 
 def ConvertPolyData(fi, fo):
-    """" read then write """
+    """ read then write """
     WritePolyData(fo, ReadPolyData(fi))
 
 
