@@ -3,11 +3,12 @@
 
 
 """
-Atlas estimation using deformetrica
+Mesh processing tools (vtk) for atlas estimation
 
-- VTK IterativeClosestPoint registration (similitud)
-- Atlas construction (similitud)
-- Deformetrica atlas construction (diffeomorphic)
+- Read/Write polydata
+- Rigid/similitud registration (using vtkIterativeClosestPoint, vtkTransform)
+- Decimation and clipping
+- numpy array to vtk points
 
 """
 
@@ -49,9 +50,7 @@ def controlpoints_to_vtkPoints(cp, mt=None):
     return pd
 
 def controlpoints_to_vtkPoints_files(cpt_file, vtk_file, mmt_file=None):
-    """
-    same but with read/write
-    """
+    """ same than controlpoints_to_vtkPoints but with read/write """
     cp = np.loadtxt(cpt_file)
     if mmt_file is not None:
         mt = np.loadtxt(mmt_file)
@@ -61,10 +60,10 @@ def controlpoints_to_vtkPoints_files(cpt_file, vtk_file, mmt_file=None):
     WritePolyData(vtk_file, pd)
 
 def load_momenta(fi):
+    """ loading momenta from a deformetrica file, 1st line = shape """
     a = np.loadtxt(fi)
-    shape = a[0, :]
-    b = a[1:, :].reshape(shape.astype("int"))
-    return b
+    shape = a[0, :].astype("int")
+    return  a[1:, :].reshape(shape)
 
 def read_landmarks_as_vtkPoints(ldm_file, img_file):
     """
@@ -120,6 +119,7 @@ def WritePolyData(file_name, pd):
             raise e
 
 def ConvertPolyData(fi, fo):
+    """" read then write """
     WritePolyData(fo, ReadPolyData(fi))
 
 
@@ -248,6 +248,7 @@ def ICPSimilitudRegistration(fix, mov, fix_ldm=None, mov_ldm=None, do_rigid=Fals
 
 
 def apply_transform(transform, mesh):
+    """ call vtkTransformPolyDataFilter """
     warper = vtk.vtkTransformPolyDataFilter()
     warper.SetTransform(transform)
     warper.SetInputData(mesh)

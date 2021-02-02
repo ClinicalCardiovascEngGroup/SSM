@@ -330,8 +330,7 @@ class DeformetricaAtlasEstimation():
         ipfx = self.odir + "output/DeterministicAtlas__EstimatedParameters__"
 
         # moment
-        from ssm_tools import load_momenta
-        m = load_momenta(ipfx + "Momenta.txt")
+        m = self.read_momenta()
         np.savetxt(odir + "forward_momenta.txt", m[sbj, :, :])
 
         # forward to get end momenta
