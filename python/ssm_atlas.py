@@ -226,11 +226,19 @@ class DeformetricaAtlasEstimation():
             sp.call("rm "+odir+"DeterministicAtlas__flow__*.vtk", shell=True)
 
 
-    def shooting(self, fv, odir, tmin=-5, tmax=+5, do_keep_all=False):
+    def shooting(self, fv, odir, tmin=-5, tmax=+5, fmesh=None, do_keep_all=False):
         """
         warp Atlas using momenta in fv
         interesting momenta are in DeterministicAtlas__EstimatedParameters__Momenta.txt
         or given by pca using save_eigv
+        arguments:
+            fv      momenta file
+            odir    output directory
+            tmin, tmax shooting parameters
+            fmesh   mesh to deform (default=Template)
+            do_keep_all do keep all the result files
+        return:
+            None
         """
 
         # General parameters
@@ -248,8 +256,9 @@ class DeformetricaAtlasEstimation():
         template_object['deformable_object_type'] = "surfacemesh"
         template_object['attachment_type'] = "current"
 
-        template_object['filename'] = os.path.normpath(
-            os.path.join(self.odir, "output/DeterministicAtlas__EstimatedParameters__Template_"+self.id+".vtk"))
+        if fmesh is None:
+            fmesh = os.path.normpath(os.path.join(self.odir, "output/DeterministicAtlas__EstimatedParameters__Template_"+self.id+".vtk"))
+        template_object['filename'] = fmesh
         xml_parameters.template_specifications[self.id] = template_object
 
         # Deformation parameters
@@ -268,7 +277,7 @@ class DeformetricaAtlasEstimation():
         visualization_tools.rename_df2pv(odir + "Shooting__GeodesicFlow__" + self.id)
 
         if not do_keep_all:
-            sp.call("rm "+odir+"Shooting__GeodesicFlow__ControlsPoints__tp*.txt", shell=True)
+            sp.call("rm "+odir+"Shooting__GeodesicFlow__ControlPoints__tp*.txt", shell=True)
             sp.call("rm "+odir+"Shooting__GeodesicFlow__Momenta__tp*.txt", shell=True)
 
     def registration(self, fmesh, odir, subject_id="subj"):

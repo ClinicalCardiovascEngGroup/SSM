@@ -87,11 +87,14 @@ def ReadPolyData(file_name):
     elif file_name[-4:] == ".vtk":
         reader = vtk.vtkPolyDataReader()
     else:
-        raise RuntimeError("unknown extension in ReadPolyData: " + file_name)
+        raise ValueError("unknown extension in ReadPolyData: " + file_name)
 
-    reader.SetFileName(file_name)
-    reader.Update()
-    return reader.GetOutput()
+    if os.path.exists(file_name):
+        reader.SetFileName(file_name)
+        reader.Update()
+        return reader.GetOutput()
+    else:
+        raise FileNotFoundError("no file: " + file_name)
 
 def WritePolyData(file_name, pd):
     """ write in a .vtk, .stl or .vtp file """
