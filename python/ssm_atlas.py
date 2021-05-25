@@ -398,8 +398,8 @@ class DeformetricaAtlasEstimation():
 
         kern = kernel_factory.factory("torch", gpu_mode=True, kernel_width=self.p_kernel_width_deformation)
 
-        a_cp = np.loadtxt(self.odir + "output/DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
-        assert a_cp.shape == m.shape
+        a_cp = self.read_ctrlpoints()
+        assert a_cp.shape[0] == m.shape[0]
 
         t_y = torch.tensor(a_cp, device="cpu")
         t_x = torch.tensor(x, device="cpu")
@@ -436,7 +436,7 @@ class DeformetricaAtlasEstimation():
         fv = os.path.normpath(os.path.join(self.odir, fname))
         ssm_tools.WritePolyData(fv, vtkp)
 
-    def render_momenta_norm(self, moments):
+    def render_momenta_norm(self, moments, do_sq_norm=True, do_render=True):
         """ render the norm of the momenta on the template geometry """
 
         # read mesh
@@ -447,8 +447,11 @@ class DeformetricaAtlasEstimation():
         # compute attributes
         z = self.convolve_momentum(moments, points)
         print(z.shape)
-        d = np.sum(z**2, axis=1)
-        assert d.size == N
+
+        if do_sq_norm:
+            d = np.sum(z**2, axis=1)
+        else:
+            d = z[:, 0]
 
         # set attributes
         scalars = vtk.vtkFloatArray()
@@ -457,4 +460,7 @@ class DeformetricaAtlasEstimation():
         v_pd.GetPointData().SetScalars(scalars)
 
         # render
-        visualization_tools.renderVtkPolyData(v_pd, vmin=0., vmax=d.max())
+        if do_render:
+            visualization_tools.renderVtkPolyData(v_pd, vmin=min(0, d.min()), vmax=d.max())
+
+        return v_pd
