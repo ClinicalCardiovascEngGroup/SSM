@@ -47,6 +47,7 @@ class DeformetricaAtlasEstimation():
 
     def __init__(self, idir="./", odir="output/", name="obj", initial_guess="", kwd=20., kwg=10., noise=10.):
         self.idir = idir
+        self.lf = None
         self.odir = odir
         self.id = name
 
@@ -152,16 +153,16 @@ class DeformetricaAtlasEstimation():
 
     def get_path_data(self, k):
         """ path of data of subject k """
-        lf = self.__get_list_vtk(sorted=True)
-        return lf[k]
+        if self.lf is None:
+            self.lf = self.__get_list_vtk(sorted=True)
+        return self.lf[k]
 
     def create_dataset_xml(self):
         """ with every vtk files in idir """
-        lf = self.__get_list_vtk(sorted=True)
-        fxml = os.path.join(self.odir, "dataset.xml")
-
-        create_data_set_xml.create_xml_atlas(lf, fxml, self.id)
-        self.dataset_xml = fxml
+        if self.lf is None:
+            self.lf = self.__get_list_vtk(sorted=True)
+        self.dataset_xml = os.path.join(self.odir, "dataset.xml")
+        create_data_set_xml.create_xml_atlas(self.lf, self.dataset_xml, self.id)
 
     def estimate(self, xml_params=None, do_keep_all=False):
         """
