@@ -19,8 +19,7 @@ import numpy as np
 import vtk
 import vtk.util.numpy_support
 
-sys.path.append("/home/face3d/Desktop/segment_faces/script/")
-import affine_deformation_landmarks
+
 
 
 ################################################################################
@@ -64,17 +63,6 @@ def load_momenta(fi):
     a = np.loadtxt(fi)
     shape = a[0, :].astype("int")
     return  a[1:, :].reshape(shape)
-
-def read_landmarks_as_vtkPoints(ldm_file, img_file):
-    """
-    read and convert a (3,n) array to vtkPoints
-    the img_file is used to compute real world coordinates
-    """
-    ldm = affine_deformation_landmarks.get_landmarks_world(ldm_file, img_file)
-    vldm = vtk.util.numpy_support.numpy_to_vtk(ldm.T)
-    points = vtk.vtkPoints()
-    points.SetData(vldm)
-    return points
 
 
 ################################################################################
@@ -257,3 +245,72 @@ def apply_transform(transform, mesh):
     warper.SetInputData(mesh)
     warper.Update()
     return warper.GetOutput()
+
+
+################################################################################
+##  Mesh distance
+
+def polydata_distance(mflo, mref, do_signed=True):
+    """ distance from mflo to mref """
+    pdd = vtk.vtkDistancePolyDataFilter()
+    pdd.SetSignedDistance(do_signed) #pdd.SignedDistanceOff()
+    pdd.SetInputData(0, mflo)
+    pdd.SetInputData(1, mref)
+
+    pdd.Update()
+    return pdd.GetOutput()
+
+
+def polydata_distance_on_ref(mflo, mref, mtpl, do_signed=True):
+    """ distance from mflo to mref recorded on mtpl
+    mflo and mtpl must have same number (and matching) points
+    """
+    mout = vtk.vtkPolyData()
+    mout.DeepCopy(mtpl)
+
+    pdd = vtk.vtkImplicitPolyDataDistance()
+    pdd.SetInput(mref)
+
+    numPts = mflo.GetNumberOfPoints()
+    distArray = vtk.vtkDoubleArray()
+    distArray.SetName("Distance")
+    distArray.SetNumberOfComponents(1)
+    distArray.SetNumberOfTuples(numPts)
+    for i in range(numPts):
+        pt = mflo.GetPoint(i)
+        d = pdd.EvaluateFunction(pt)
+        if do_signed:
+            distArray.SetValue(i, d)
+        else:
+            distArray.SetValue(i, np.abs(d))
+
+    mout.GetPointData().AddArray(distArray)
+    return mout
+
+################################################################################
+### Flipping mesh
+def flipx(pd, c):
+    """ flip mesh along x-axis and center c (only cx matters) """
+
+    # setting up the transform (could be factorised if applied t o several subjects), but not a big overhead
+    d = tuple([-x for x in c])
+
+    transform = vtk.vtkTransform()
+    transform.PostMultiply()
+    transform.Translate(d)
+    transform.Scale(-1, 1, 1)
+    transform.Translate(c)
+
+    t = vtk.vtkTransformPolyDataFilter()
+    t.SetTransform(transform)
+
+    rev = vtk.vtkReverseSense()
+
+    # apply
+    t.SetInputData(pd)
+    t.Update()
+
+    rev.SetInputData(t.GetOutput())
+    rev.Update()
+
+    return rev.GetOutput()
