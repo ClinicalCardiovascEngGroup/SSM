@@ -111,7 +111,7 @@ class DeformetricaAtlasPCA():
 
         matplotlib.rcParams.update({'font.size': 16})
 
-        fig, (ax0,ax1) = plt.subplots(1,2, figsize=(14, 6))
+        fig, (ax0,ax1) = plt.subplots(1,2, figsize=(12, 5), constrained_layout=True)
 
         x1 = self.pca_s[axes[0]]*self.pca_u[:, axes[0]]
         y1 = self.pca_s[axes[1]]*self.pca_u[:, axes[1]]
@@ -124,7 +124,7 @@ class DeformetricaAtlasPCA():
         else:
             mp = ax0.scatter(x1, y1, c=color, s=30, cmap=cmap)
             mp = ax1.scatter(x2, y2, c=color, s=30, cmap=cmap)
-            plt.colorbar(mp)
+            fig.colorbar(mp)
 
         if labels:
             N = self.pca_u.shape[0]
@@ -159,7 +159,6 @@ class DeformetricaAtlasPCA():
         ax1.grid(True)
         ax1.axis('equal')
 
-
         if save_fig:
             fig.savefig(self.odir + "fig_pca_projection.png")
         return fig
@@ -180,7 +179,7 @@ class DeformetricaAtlasPCA():
 
         y = x @ self.pca_v.T
 
-        fig = self.plot_pca_projection(save_fig=False)
+        fig = self.plot_pca_projection(save_fig=False, axes=(0,1,2,3))
         ax0, ax1 = fig.axes
 
         ax0.plot(y[:, 0], y[:, 1], "+", ms=12, color="C1")

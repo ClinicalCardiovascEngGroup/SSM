@@ -75,7 +75,6 @@ class DeformetricaAtlasEstimation():
 
         if sorted:
             lf.sort()
-
         return lf
 
     def save_parameters(self):
@@ -91,7 +90,7 @@ class DeformetricaAtlasEstimation():
         with open(self.odir + "params.json", "w") as fd:
             json.dump(d, fd, indent=2)
 
-    def load_parameters(self, fjson):
+    def load_parameters(self, fjson, do_load_lf=False):
         """loading parameters from a json"""
         with open(fjson, "r") as fd:
             d = json.load(fd)
@@ -103,6 +102,8 @@ class DeformetricaAtlasEstimation():
             self.p_kernel_width_deformation = d["kwd"]
             self.p_kernel_width_geometry = d["kwg"]
             self.p_noise = d["noise"]
+        if do_load_lf:
+            self.lf = self.__get_list_vtk(sorted=True)
 
 
     def check_initialisation(self):
@@ -395,6 +396,8 @@ class DeformetricaAtlasEstimation():
                             ex: m=self.momenta[0,:], m=get_eigv(0)
         kw: float,          kernel width
         x : np.array N, 3,  coordinates
+        return:
+        z : np.array N, 3
         """
 
         kern = kernel_factory.factory("torch", gpu_mode=True, kernel_width=self.p_kernel_width_deformation)
@@ -438,7 +441,10 @@ class DeformetricaAtlasEstimation():
         ssm_tools.WritePolyData(fv, vtkp)
 
     def render_momenta_norm(self, moments, do_sq_norm=True, do_render=True):
-        """ render the norm of the momenta on the template geometry """
+        """
+        render the norm of the momenta on the template geometry
+        moments.shape = (ncp, k)
+        """
 
         # read mesh
         v_pd = self.read_template()
