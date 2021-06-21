@@ -9,7 +9,6 @@ deformetrica estimate model.xml data-set.xml -p optimization_parameters.xml
 
 """
 
-
 import subprocess as sp
 import os, sys
 import glob
@@ -28,9 +27,6 @@ import torch
 
 
 import deformetrica
-# modules api, core, in_out and support are part of deformetrica \o/
-import support.kernels as kernel_factory
-
 
 import create_data_set_xml
 import visualization_tools
@@ -71,7 +67,7 @@ class DeformetricaAtlasEstimation():
         if os.path.isdir(self.idir):
             lf = glob.glob(os.path.join(self.idir, "*.vtk"))
         else:
-            lf = glob.glob(self.idir + "*.vtk")
+            lf = glob.glob(self.idir)
 
         if sorted:
             lf.sort()
@@ -182,7 +178,7 @@ class DeformetricaAtlasEstimation():
         self.create_dataset_xml()
 
         # General parameters
-        xml_parameters = deformetrica.XmlParameters()
+        xml_parameters = deformetrica.in_out.XmlParameters()
         xml_parameters._read_optimization_parameters_xml(self.optimization_parameters_xml)
         xml_parameters._read_model_xml(self.model_xml)
         xml_parameters._read_dataset_xml(self.dataset_xml)
@@ -219,9 +215,9 @@ class DeformetricaAtlasEstimation():
         Deformetrica = deformetrica.api.Deformetrica(output_dir=odir, verbosity="DEBUG")
         Deformetrica.estimate_deterministic_atlas(
             xml_parameters.template_specifications,
-            deformetrica.get_dataset_specifications(xml_parameters),
-            estimator_options=deformetrica.get_estimator_options(xml_parameters),
-            model_options=deformetrica.get_model_options(xml_parameters))
+            deformetrica.in_out.get_dataset_specifications(xml_parameters),
+            estimator_options=deformetrica.in_out.get_estimator_options(xml_parameters),
+            model_options=deformetrica.in_out.get_model_options(xml_parameters))
 
         ## cleaning a bit the deformetrica output
         if not do_keep_all:
@@ -244,7 +240,7 @@ class DeformetricaAtlasEstimation():
         """
 
         # General parameters
-        xml_parameters = deformetrica.XmlParameters()
+        xml_parameters = deformetrica.in_out.XmlParameters()
         xml_parameters._read_optimization_parameters_xml(self.optimization_parameters_xml)
         xml_parameters._read_model_xml(self.model_xml)
 
@@ -274,7 +270,7 @@ class DeformetricaAtlasEstimation():
         Deformetrica = deformetrica.api.Deformetrica(output_dir=odir, verbosity="INFO")
 
         Deformetrica.compute_shooting(xml_parameters.template_specifications,
-                model_options=deformetrica.get_model_options(xml_parameters))
+                model_options=deformetrica.in_out.get_model_options(xml_parameters))
 
         visualization_tools.rename_df2pv(odir + "Shooting__GeodesicFlow__" + self.id)
 
@@ -289,7 +285,7 @@ class DeformetricaAtlasEstimation():
         """
 
         # General parameters
-        xml_parameters = deformetrica.XmlParameters()
+        xml_parameters = deformetrica.in_out.XmlParameters()
         xml_parameters._read_optimization_parameters_xml(self.optimization_parameters_xml)
         xml_parameters._read_model_xml(self.model_xml)
 
@@ -326,8 +322,8 @@ class DeformetricaAtlasEstimation():
         Deformetrica.estimate_registration(
             xml_parameters.template_specifications,
             dataset_specifications,
-            estimator_options=deformetrica.get_estimator_options(xml_parameters),
-            model_options=deformetrica.get_model_options(xml_parameters))
+            estimator_options=deformetrica.in_out.get_estimator_options(xml_parameters),
+            model_options=deformetrica.in_out.get_model_options(xml_parameters))
 
 
     def momenta_from_sbj_to_atlas(self, sbj, odir, do_warpback=False):
@@ -400,7 +396,7 @@ class DeformetricaAtlasEstimation():
         z : np.array N, 3
         """
 
-        kern = kernel_factory.factory("torch", gpu_mode=True, kernel_width=self.p_kernel_width_deformation)
+        kern = deformetrica.support.kernels.factory("torch", gpu_mode=True, kernel_width=self.p_kernel_width_deformation)
 
         a_cp = self.read_ctrlpoints()
         assert a_cp.shape[0] == m.shape[0]
