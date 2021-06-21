@@ -18,6 +18,7 @@ Options:
     --kwg FLOAT        kernel width of the geometry [default: 10.]
     --kwd FLOAT        kernel width of the diffeomorphisms [default: 20.]
     --noise FLOAT      noise [default: 10.]
+    --show
 """
 
 
@@ -73,7 +74,11 @@ if __name__ == "__main__":
     ae.check_initialisation()
     ae.estimate()
 
-    sp.call(["paraview", "--data=" + ae.odir + "/output/DeterministicAtlas__EstimatedParameters__Template_" + ae.id + ".vtk"])
+    if params["--show"]:
+        try:
+            sp.call(["paraview", "--data=" + ae.odir + "/output/DeterministicAtlas__EstimatedParameters__Template_" + ae.id + ".vtk"])
+        except FileNotFoundError:
+            pass
 
     # PCA
     ao = ssm_pca.DeformetricaAtlasPCA(
@@ -94,6 +99,10 @@ if __name__ == "__main__":
     ae.shooting(f0 + ".txt", ae.odir + "pca/shoot0/")
     ae.shooting(f1 + ".txt", ae.odir + "pca/shoot1/")
 
-    sp.call(["paraview", "--data=" + ae.odir + "pca/shoot0/Shooting__GeodesicFlow__" + ae.id + "_tp..vtk"])
+    if params["--show"]:
+        try:
+            sp.call(["paraview", "--data=" + ae.odir + "pca/shoot0/Shooting__GeodesicFlow__" + ae.id + "_tp..vtk"])
+        except FileNotFoundError:
+            pass
 
-    ae.render_momenta_norm(ao.get_eigv(0))
+        ae.render_momenta_norm(ao.get_eigv(0))
