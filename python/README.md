@@ -12,13 +12,14 @@ work in progress...
 
 * recursive atlas estimation
 * organize output
+* update for 4.3.0, in particular packaging was improved in 4.3.0. No more modules api, core, in_out and support at the same level.
 
 
 --------------------------------------------------------------------------------
 
 ### Dependencies of the code:
 
-* Deformetrica 4.2
+* Deformetrica 4.3
 * VTK 8.2.0
 
 --------------------------------------------------------------------------------

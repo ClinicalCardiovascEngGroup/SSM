@@ -1,0 +1,7 @@
+deformetrica==4.3
+glob
+json
+numpy
+scipy
+vtk >= 8.2
+torch
