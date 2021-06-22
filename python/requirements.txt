@@ -1,5 +1,6 @@
 deformetrica==4.3
 glob
+docopt
 json
 numpy
 scipy
