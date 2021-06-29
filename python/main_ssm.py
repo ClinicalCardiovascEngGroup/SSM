@@ -10,7 +10,7 @@ Usage:
 
 Options:
     -c FILE, --config FILE      Config file
-    -i PATH, --idir PATH        Input files prefix (include 'idir*.vtk')
+    -i PATH, --idir PATH        Input files prefix (use quotes to include 'idir*.vtk')
     -o PATH, --odir PATH        Output directory [default: output/]
     -n NAME, --name NAME        Object name [default: geom]
     -t MESH, --template MESH    Initial guess, int or path [default: 0]
@@ -75,6 +75,10 @@ if __name__ == "__main__":
     # Atlas estimation
     if not params["--no-check"]:
         ae.check_initialisation()
+    else:
+        ae.p_kernel_width_geometry = float(ae.p_kernel_width_geometry)
+        ae.p_kernel_width_deformation =  float(ae.p_kernel_width_deformation)
+        ae.p_noise =  float(ae.p_noise)
     ae.estimate()
     ae.save_parameters()
 
@@ -97,7 +101,7 @@ if __name__ == "__main__":
 
         ae.shooting(f0 + ".txt", ae.odir + "pca/shoot0/")
         ae.shooting(f1 + ".txt", ae.odir + "pca/shoot1/")
-        
+
         #ae.render_momenta_norm(ao.get_eigv(0))
         if params["--show-pw"]:
             try:
@@ -112,3 +116,5 @@ if __name__ == "__main__":
     #ae.registration(fmesh, ae.odir + "registration/", subject_id="subj")
     #fmomenta = ae.odir + "registration/DeterministicAtlas__EstimatedParameters__Momenta.txt"
     #fig = ao.project_subject_on_pca(fmomenta)
+
+    print("Done.")

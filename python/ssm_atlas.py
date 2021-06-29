@@ -205,7 +205,7 @@ class DeformetricaAtlasEstimation():
         template_object ['kernel_device'] = 'gpu'
 
         template_object['noise_std'] =  self.p_noise
-        template_object['filename'] = self.initial_guess
+        template_object['filename'] = os.path.abspath(self.initial_guess)
         template_object['kernel_width'] = self.p_kernel_width_geometry
         xml_parameters.template_specifications[self.id] = template_object
 
@@ -213,11 +213,14 @@ class DeformetricaAtlasEstimation():
         # call: deformetrica estimate model.xml dataset.xml -p optimization_parameters.xml
         odir = os.path.join(self.odir, "output/")
         Deformetrica = deformetrica.api.Deformetrica(output_dir=odir, verbosity="DEBUG")
+
         Deformetrica.estimate_deterministic_atlas(
             xml_parameters.template_specifications,
             deformetrica.in_out.get_dataset_specifications(xml_parameters),
             estimator_options=deformetrica.in_out.get_estimator_options(xml_parameters),
             model_options=deformetrica.in_out.get_model_options(xml_parameters))
+
+
 
         ## cleaning a bit the deformetrica output
         if not do_keep_all:

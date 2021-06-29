@@ -25,7 +25,7 @@ def create_xml_atlas(lfiles, foxml, oid="face"):
         f = doc.createElement('filename')
         f.setAttribute('object_id', oid)
 
-        t = doc.createTextNode(fn)
+        t = doc.createTextNode(os.path.abspath(fn))
 
         f.appendChild(t)
         v.appendChild(f)
