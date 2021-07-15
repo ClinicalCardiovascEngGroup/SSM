@@ -15,9 +15,11 @@ import glob
 import json
 
 # to enable built in directory tab completion with raw_input():
-import readline
-readline.parse_and_bind("tab: complete")
-
+try:
+    import readline
+    readline.parse_and_bind("tab: complete")
+except:
+    pass
 
 import numpy as np
 import scipy, scipy.linalg
@@ -85,7 +87,7 @@ class DeformetricaAtlasEstimation():
             "kwg":self.p_kernel_width_geometry,
             "noise":self.p_noise
             }
-        with open(self.odir + "params.json", "w") as fd:
+        with open(os.path.join(self.odir, "params.json"), "w") as fd:
             json.dump(d, fd, indent=2)
 
     def load_parameters(self, fjson, do_load_lf=False):
