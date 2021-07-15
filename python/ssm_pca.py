@@ -95,7 +95,7 @@ class DeformetricaAtlasPCA():
         ax1.plot(self.pca_s[:10], "+-", linewidth=3, markersize=12, markeredgewidth=3)
         ax1.set_title("First eigvalues (log-scale)")
         ax1.grid(True)
-        ax1.set_yscale("log", nonposy='mask')
+        ax1.set_yscale("log", nonpositive='mask')
 
 
         ax2.plot(np.concatenate((np.zeros(1), (self.pca_s**2).cumsum()/(self.pca_s**2).sum())), "+-", linewidth=3, markersize=8)
