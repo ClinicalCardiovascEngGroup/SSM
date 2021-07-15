@@ -7,8 +7,8 @@ Linear registration to a reference
 Register meshes to a target template using similarity or rigid deformation
 
 Usage:
-    main_linear_registrion (rigid|similarity|affine) -t <target> -o <odir> <mesh>...
-    main_linear_registrion -h
+    main_linear_registration (rigid|similarity|affine) -t <target> -o <odir> <mesh>...
+    main_linear_registration -h
 
 Options:
     -t PATH  target template
@@ -17,7 +17,7 @@ Options:
 """
 
 import vtk
-import sys
+import sys, os
 import docopt
 import ssm_tools
 
@@ -27,6 +27,10 @@ if __name__ == "__main__":
 
     params = docopt.docopt(__doc__, help=True, version='0.1')
     print(params)
+
+    # outdir
+    if not os.path.exists(params["-o"]):
+        os.mkdir(params["-o"])
 
     # fix mesh
     fix = ssm_tools.ReadPolyData(params["-t"])
@@ -53,6 +57,6 @@ if __name__ == "__main__":
         transform.SetSource(mov)
         transform.Update()
         res = ssm_tools.apply_transform(transform, mov)
-        ssm_tools.WritePolyData(params["-o"] + f.split("/")[-1], res)
+        ssm_tools.WritePolyData(os.path.join(params["-o"], f.split("/")[-1]), res)
 
     print("Done.")
