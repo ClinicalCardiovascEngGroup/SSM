@@ -46,6 +46,8 @@ class DeformetricaAtlasEstimation():
         self.lf = None
         self.odir = odir
         self.id = name
+        self.object_type = 'surfacemesh'
+        self.attachment = 'current'
 
         if isinstance(initial_guess, int):
             self.initial_guess = self.get_path_data(initial_guess)
@@ -199,8 +201,8 @@ class DeformetricaAtlasEstimation():
 
         # Template
         template_object = xml_parameters._initialize_template_object_xml_parameters()
-        template_object['deformable_object_type'] = "surfacemesh"
-        template_object['attachment_type'] = "current"
+        template_object['deformable_object_type'] = self.object_type
+        template_object['attachment_type'] = self.attachment
         template_object['kernel_type'] = 'torch'
         template_object ['kernel_device'] = 'gpu'
 
@@ -254,8 +256,8 @@ class DeformetricaAtlasEstimation():
 
         # Template
         template_object = xml_parameters._initialize_template_object_xml_parameters()
-        template_object['deformable_object_type'] = "surfacemesh"
-        template_object['attachment_type'] = "current"
+        template_object['deformable_object_type'] = self.object_type
+        template_object['attachment_type'] = self.attachment
 
         if fmesh is None:
             fmesh = os.path.normpath(os.path.join(self.odir, "output/DeterministicAtlas__EstimatedParameters__Template_"+self.id+".vtk"))
@@ -275,9 +277,8 @@ class DeformetricaAtlasEstimation():
         Deformetrica.compute_shooting(xml_parameters.template_specifications,
                 model_options=deformetrica.in_out.get_model_options(xml_parameters))
 
-        visualization_tools.rename_df2pv(odir + "Shooting__GeodesicFlow__" + self.id)
-
         if not do_keep_all:
+            visualization_tools.rename_df2pv(odir + "Shooting__GeodesicFlow__" + self.id)
             sp.call("rm "+odir+"Shooting__GeodesicFlow__ControlPoints__tp*.txt", shell=True)
             sp.call("rm "+odir+"Shooting__GeodesicFlow__Momenta__tp*.txt", shell=True)
 
@@ -299,8 +300,8 @@ class DeformetricaAtlasEstimation():
 
         # Template
         template_object = xml_parameters._initialize_template_object_xml_parameters()
-        template_object['deformable_object_type'] = "surfacemesh"
-        template_object['attachment_type'] = "current"
+        template_object['deformable_object_type'] = self.object_type
+        template_object['attachment_type'] = self.attachment
         template_object['kernel_type'] = 'torch'
         template_object ['kernel_device'] = 'gpu'
         template_object['noise_std'] =  self.p_noise
@@ -345,7 +346,7 @@ class DeformetricaAtlasEstimation():
 
         # forward to get end momenta
         template_specifications = {
-            self.id: {'deformable_object_type': 'surfacemesh',
+            self.id: {'deformable_object_type': self.object_type,
             'noise_std': self.p_noise,
             'filename': ipfx + "Template_" + self.id +".vtk"}
         }
@@ -369,7 +370,7 @@ class DeformetricaAtlasEstimation():
         # backward shooting (could be manually applied to other meshes!)
         if do_warpback:
             template_specifications = {
-                self.id: {'deformable_object_type': 'surfacemesh',
+                self.id: {'deformable_object_type': self.object_type,
                 'noise_std': self.p_noise,
                 'filename': self.get_path_data(sbj)}
             }
