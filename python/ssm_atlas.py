@@ -31,7 +31,7 @@ import torch
 
 import deformetrica
 
-import ssm_tools
+import ssm_io
 import create_data_set_xml
 import visualization_tools
 
@@ -422,7 +422,7 @@ class DeformetricaAtlasEstimation():
         """ return polydata of the template """
         ft = self.odir + "output/DeterministicAtlas__EstimatedParameters__Template_{}.vtk".format(self.id)
         ft = os.path.abspath(ft).encode()
-        return ssm_tools.ReadPolyData(ft)
+        return ssm_io.ReadPolyData(ft)
 
     def read_momenta(self):
         """ read the momenta file, first line contain the shape """
@@ -436,8 +436,8 @@ class DeformetricaAtlasEstimation():
     def save_controlpoints_vtk(self, fname="controlpoints.vtk", X=None):
         """ save controlpoints (could add some momenta X (n, d)) as vtk point cloud """
         ctrlpts = self.read_ctrlpoints()
-        vtkp = ssm_tools.controlpoints_to_vtkPoints(ctrlpts, X)
-        ssm_tools.WritePolyData(os.path.normpath(os.path.join(self.odir, fname)), vtkp)
+        vtkp = ssm_io.controlpoints_to_vtkPoints(ctrlpts, X)
+        ssm_io.WritePolyData(os.path.normpath(os.path.join(self.odir, fname)), vtkp)
 
     def render_momenta_norm(self, moments, do_sq_norm=True, do_render=True):
         """

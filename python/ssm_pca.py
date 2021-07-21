@@ -27,8 +27,6 @@ logger.setLevel(logging.INFO)
 logging.getLogger('matplotlib.font_manager').disabled = True
 
 
-
-
 ################################################################################
 ##  Deformetrica outputs data class
 
@@ -217,9 +215,9 @@ class DeformetricaAtlasPCA():
         np.savetxt(fv + ".txt", A, fmt="%.6f")
 
         if with_controlpoints:
-            import ssm_tools
+            from ssm_io import controlpoints_to_vtkPoints, WritePolyData
             ctrlpts = np.loadtxt(self.idir + "DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
-            vtkp = ssm_tools.controlpoints_to_vtkPoints(ctrlpts, A)
-            ssm_tools.WritePolyData(fv + ".vtk", vtkp)
+            controlpoints_to_vtkPoints(ctrlpts, A)
+            WritePolyData(fv + ".vtk", vtkp)
 
         return fv
