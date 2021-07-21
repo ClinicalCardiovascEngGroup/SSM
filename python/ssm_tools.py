@@ -123,25 +123,27 @@ def DecimatePolyData(pd, reduction=0.9, ntarget=None):
     if ntarget is not None override reduction factor
     vtkDecimatePro only process triangles we use vtkTriangleFilter first
     """
+    n = pd.GetPoints().GetNumberOfPoints()
     if ntarget is not None:
-        n = pd.GetPoints().GetNumberOfPoints()
         reduction = (n-ntarget)/n
-        print("reduction: ", n, reduction)
+    print("reduction: ", n, reduction)
 
     triangulate = vtk.vtkTriangleFilter()
     triangulate.SetInputData(pd)
     triangulate.Update()
 
-    #decimate = vtk.vtkDecimatePro()
-    decimate = vtk.vtkQuadricDecimation()
+    decimate = vtk.vtkDecimatePro()
+    #decimate = vtk.vtkQuadricDecimation()
     decimate.SetInputData(triangulate.GetOutput())
     decimate.SetTargetReduction(reduction)
-    #decimate.PreserveTopologyOn()
+    decimate.PreserveTopologyOn()
     decimate.Update()
 
-    decimated = vtk.vtkPolyData()
-    decimated.ShallowCopy(decimate.GetOutput())
-    return decimated
+    triangleFilter = vtk.vtkTriangleFilter()
+    triangleFilter.SetInputData(decimate.GetOutput())
+    triangleFilter.Update()
+
+    return triangleFilter.GetOutput()
 
 
 def ExtractGeometryZ(pd, nx, ny, nz, z0):
@@ -184,10 +186,11 @@ def LandmarkSimilitudRegistration(fix, mov):
     return transform
 
 
-
 def ICPSimilitudRegistration(fix, mov, fix_ldm=None, mov_ldm=None, do_rigid=False):
     """
     IterativeClosestPoint registration between two vtkPolyData
+    return the vtkTransform
+
     can be initialized using landmarks
     (then return a composed vtkTransform instead of a vtkIterativeClosestPointTransform)
     """
@@ -202,7 +205,6 @@ def ICPSimilitudRegistration(fix, mov, fix_ldm=None, mov_ldm=None, do_rigid=Fals
     #transform.SetMaximumNumberOfLandmarks(100)
 
     # initialize using landmarks
-    # (I could not find how to initialize the deformation so we warp a mesh)
     if fix_ldm is not None and mov_ldm is not None:
         ldm_transform = vtk.vtkLandmarkTransform()
         ldm_transform.SetSourceLandmarks(mov_ldm)

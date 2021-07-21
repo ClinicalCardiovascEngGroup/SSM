@@ -14,12 +14,9 @@ import os, sys
 
 import numpy as np
 
-
 import scipy, scipy.linalg
 import matplotlib
 import matplotlib.pyplot as plt
-
-import ssm_tools
 
 
 import logging
@@ -220,6 +217,7 @@ class DeformetricaAtlasPCA():
         np.savetxt(fv + ".txt", A, fmt="%.6f")
 
         if with_controlpoints:
+            import ssm_tools
             ctrlpts = np.loadtxt(self.idir + "DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
             vtkp = ssm_tools.controlpoints_to_vtkPoints(ctrlpts, A)
             ssm_tools.WritePolyData(fv + ".vtk", vtkp)

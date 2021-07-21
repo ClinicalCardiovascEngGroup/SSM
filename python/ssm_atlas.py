@@ -23,6 +23,7 @@ except:
 
 import numpy as np
 import scipy, scipy.linalg
+
 import vtk
 from vtk.util import numpy_support as nps
 import torch
@@ -30,6 +31,7 @@ import torch
 
 import deformetrica
 
+import ssm_tools
 import create_data_set_xml
 import visualization_tools
 
@@ -231,7 +233,7 @@ class DeformetricaAtlasEstimation():
             sp.call("rm "+odir+"DeterministicAtlas__flow__*.vtk", shell=True)
 
 
-    def shooting(self, fv, odir, tmin=-5, tmax=+5, fmesh=None, do_keep_all=False):
+    def shooting(self, fv, odir, tmin=-5, tmax=+5, fmesh=None, do_keep_all=False, concentration_of_time_points=4):
         """
         warp Atlas using momenta in fv
         interesting momenta are in DeterministicAtlas__EstimatedParameters__Momenta.txt
@@ -267,7 +269,9 @@ class DeformetricaAtlasEstimation():
         xml_parameters.template_specifications[self.id] = template_object
 
         # Deformation parameters
+        xml_parameters.concentration_of_time_points = concentration_of_time_points
         xml_parameters.deformation_kernel_width = self.p_kernel_width_deformation
+
         xml_parameters.t0 = 0.
         xml_parameters.tmin = tmin
         xml_parameters.tmax = tmax
@@ -418,12 +422,7 @@ class DeformetricaAtlasEstimation():
         """ return polydata of the template """
         ft = self.odir + "output/DeterministicAtlas__EstimatedParameters__Template_{}.vtk".format(self.id)
         ft = os.path.abspath(ft).encode()
-
-        reader = vtk.vtkPolyDataReader()
-        reader.SetFileName(ft)
-        reader.Update()
-        v_pd = reader.GetOutput()
-        return v_pd
+        return ssm_tools.ReadPolyData(ft)
 
     def read_momenta(self):
         """ read the momenta file, first line contain the shape """
@@ -436,11 +435,9 @@ class DeformetricaAtlasEstimation():
 
     def save_controlpoints_vtk(self, fname="controlpoints.vtk", X=None):
         """ save controlpoints (could add some momenta X (n, d)) as vtk point cloud """
-        import ssm_tools
-        ctrlpts = np.loadtxt(self.odir + "output/DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
+        ctrlpts = self.read_ctrlpoints()
         vtkp = ssm_tools.controlpoints_to_vtkPoints(ctrlpts, X)
-        fv = os.path.normpath(os.path.join(self.odir, fname))
-        ssm_tools.WritePolyData(fv, vtkp)
+        ssm_tools.WritePolyData(os.path.normpath(os.path.join(self.odir, fname)), vtkp)
 
     def render_momenta_norm(self, moments, do_sq_norm=True, do_render=True):
         """
