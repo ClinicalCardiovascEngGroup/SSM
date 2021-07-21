@@ -18,6 +18,7 @@ import scipy, scipy.linalg
 import matplotlib
 import matplotlib.pyplot as plt
 
+from . import iovtk
 
 import logging
 logger = logging.getLogger("ssm_pca")
@@ -215,9 +216,8 @@ class DeformetricaAtlasPCA():
         np.savetxt(fv + ".txt", A, fmt="%.6f")
 
         if with_controlpoints:
-            import io
             ctrlpts = np.loadtxt(self.idir + "DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
-            io.controlpoints_to_vtkPoints(ctrlpts, A)
-            io.WritePolyData(fv + ".vtk", vtkp)
+            vtkp = iovtk.controlpoints_to_vtkPoints(ctrlpts, A)
+            iovtk.WritePolyData(fv + ".vtk", vtkp)
 
         return fv

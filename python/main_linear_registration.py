@@ -19,7 +19,7 @@ Options:
 import vtk
 import sys, os
 import docopt
-import ssm.tools, ssm.io
+import ssm.tools, ssm.iovtk
 
 ################################################################################
 ## Main
@@ -33,7 +33,7 @@ if __name__ == "__main__":
         os.mkdir(params["-o"])
 
     # fix mesh
-    fix = ssm.io.ReadPolyData(params["-t"])
+    fix = ssm.iovtk.ReadPolyData(params["-t"])
 
     # transform
     transform = vtk.vtkIterativeClosestPointTransform()
@@ -53,10 +53,10 @@ if __name__ == "__main__":
     # ICP registration
     for f in params["<mesh>"]:
         print("aligning", f)
-        mov = ssm.io.ReadPolyData(f)
+        mov = ssm.iovtk.ReadPolyData(f)
         transform.SetSource(mov)
         transform.Update()
         res = ssm.tools.apply_transform(transform, mov)
-        ssm.io.WritePolyData(os.path.join(params["-o"], f.split("/")[-1]), res)
+        ssm.iovtk.WritePolyData(os.path.join(params["-o"], f.split("/")[-1]), res)
 
     print("Done.")

@@ -31,9 +31,9 @@ import torch
 
 import deformetrica
 
-import io
-import data_set_xml
-import visualization_tools
+from . import iovtk
+from . import data_set_xml
+from . import visualization_tools
 
 
 import logging
@@ -64,8 +64,8 @@ class DeformetricaAtlasEstimation():
 
         self.dataset_xml = ""
 
-        self.optimization_parameters_xml = os.path.join(os.path.dirname(__file__), "ressources/optimization_parameters.xml")
-        self.model_xml = os.path.join(os.path.dirname(__file__), "ressources/model-atlas-template.xml")
+        self.optimization_parameters_xml = os.path.join(os.path.dirname(__file__), "../ressources/optimization_parameters.xml")
+        self.model_xml = os.path.join(os.path.dirname(__file__), "../ressources/model-atlas-template.xml")
 
     def __get_list_vtk(self, sorted=False):
         """ list of vtk using prefix in self.idir """
@@ -422,7 +422,7 @@ class DeformetricaAtlasEstimation():
         """ return polydata of the template """
         ft = self.odir + "output/DeterministicAtlas__EstimatedParameters__Template_{}.vtk".format(self.id)
         ft = os.path.abspath(ft).encode()
-        return io.ReadPolyData(ft)
+        return iovtk.ReadPolyData(ft)
 
     def read_momenta(self):
         """ read the momenta file, first line contain the shape """
@@ -436,8 +436,8 @@ class DeformetricaAtlasEstimation():
     def save_controlpoints_vtk(self, fname="controlpoints.vtk", X=None):
         """ save controlpoints (could add some momenta X (n, d)) as vtk point cloud """
         ctrlpts = self.read_ctrlpoints()
-        vtkp = io.controlpoints_to_vtkPoints(ctrlpts, X)
-        io.WritePolyData(os.path.normpath(os.path.join(self.odir, fname)), vtkp)
+        vtkp = iovtk.controlpoints_to_vtkPoints(ctrlpts, X)
+        iovtk.WritePolyData(os.path.normpath(os.path.join(self.odir, fname)), vtkp)
 
     def render_momenta_norm(self, moments, do_sq_norm=True, do_render=True):
         """
