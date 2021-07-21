@@ -215,9 +215,9 @@ class DeformetricaAtlasPCA():
         np.savetxt(fv + ".txt", A, fmt="%.6f")
 
         if with_controlpoints:
-            from ssm_io import controlpoints_to_vtkPoints, WritePolyData
+            import io
             ctrlpts = np.loadtxt(self.idir + "DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
-            controlpoints_to_vtkPoints(ctrlpts, A)
-            WritePolyData(fv + ".vtk", vtkp)
+            io.controlpoints_to_vtkPoints(ctrlpts, A)
+            io.WritePolyData(fv + ".vtk", vtkp)
 
         return fv

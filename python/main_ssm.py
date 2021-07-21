@@ -31,8 +31,8 @@ import logging
 
 import docopt, configparser
 
-import ssm_pca
-import ssm_atlas
+import ssm.pca
+import ssm.atlas
 
 ################################################################################
 ## Parameters
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     params = input_parameters()
 
     sp.call(["mkdir", "-p", params["--odir"]])
-    ae = ssm_atlas.DeformetricaAtlasEstimation(
+    ae = ssm.atlas.DeformetricaAtlasEstimation(
         idir=params["--idir"],
         odir=params["--odir"],
         name=params["--name"],
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     # PCA
     if params["--do-pca"]:
-        ao = ssm_pca.DeformetricaAtlasPCA(
+        ao = ssm.pca.DeformetricaAtlasPCA(
             idir = ae.odir + "output/",
             odir = ae.odir + "pca/")
         ao.compute_pca(with_plots=True)

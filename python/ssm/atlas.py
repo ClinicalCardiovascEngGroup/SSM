@@ -31,8 +31,8 @@ import torch
 
 import deformetrica
 
-import ssm_io
-import create_data_set_xml
+import io
+import data_set_xml
 import visualization_tools
 
 
@@ -165,7 +165,7 @@ class DeformetricaAtlasEstimation():
         if self.lf is None:
             self.lf = self.__get_list_vtk(sorted=True)
         self.dataset_xml = os.path.join(self.odir, "dataset.xml")
-        create_data_set_xml.create_xml_atlas(self.lf, self.dataset_xml, self.id)
+        data_set_xml.create_xml_atlas(self.lf, self.dataset_xml, self.id)
 
     def estimate(self, xml_params=None, do_keep_all=False):
         """
@@ -422,7 +422,7 @@ class DeformetricaAtlasEstimation():
         """ return polydata of the template """
         ft = self.odir + "output/DeterministicAtlas__EstimatedParameters__Template_{}.vtk".format(self.id)
         ft = os.path.abspath(ft).encode()
-        return ssm_io.ReadPolyData(ft)
+        return io.ReadPolyData(ft)
 
     def read_momenta(self):
         """ read the momenta file, first line contain the shape """
@@ -436,8 +436,8 @@ class DeformetricaAtlasEstimation():
     def save_controlpoints_vtk(self, fname="controlpoints.vtk", X=None):
         """ save controlpoints (could add some momenta X (n, d)) as vtk point cloud """
         ctrlpts = self.read_ctrlpoints()
-        vtkp = ssm_io.controlpoints_to_vtkPoints(ctrlpts, X)
-        ssm_io.WritePolyData(os.path.normpath(os.path.join(self.odir, fname)), vtkp)
+        vtkp = io.controlpoints_to_vtkPoints(ctrlpts, X)
+        io.WritePolyData(os.path.normpath(os.path.join(self.odir, fname)), vtkp)
 
     def render_momenta_norm(self, moments, do_sq_norm=True, do_render=True):
         """
