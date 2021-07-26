@@ -73,12 +73,7 @@ if __name__ == "__main__":
         noise=params["--noise"])
 
     # Atlas estimation
-    if not params["--no-check"]:
-        ae.check_initialisation()
-    else:
-        ae.p_kernel_width_geometry = float(ae.p_kernel_width_geometry)
-        ae.p_kernel_width_deformation =  float(ae.p_kernel_width_deformation)
-        ae.p_noise =  float(ae.p_noise)
+    ae.check_initialisation(do_quick=params["--no-check"])
     ae.estimate()
     ae.save_parameters()
 

@@ -108,7 +108,7 @@ class DeformetricaAtlasEstimation():
             self.lf = self.__get_list_vtk(sorted=True)
 
 
-    def check_initialisation(self):
+    def check_initialisation(self, do_quick=False):
         """ check that the input paths exist """
 
         def __get_input_path(s, p, pass_check=False):
@@ -124,6 +124,7 @@ class DeformetricaAtlasEstimation():
                     print("path {} does not exist".format(x))
 
         def __get_input_float(s, p):
+            """ ask for a float using string s and default value p """
             while True:
                 try:
                     x = input(s + " [{}]: ".format(p))
@@ -133,26 +134,37 @@ class DeformetricaAtlasEstimation():
                 except ValueError:
                     print("not a float")
 
-        self.idir = __get_input_path("Set input directory", self.idir, True)
-        print(len(self.__get_list_vtk()), "vtk-files in input directory")
+        if do_quick:
+            try:
+                k = int(self.initial_guess)
+                self.initial_guess = self.get_path_data(k)
+            except ValueError:
+                pass
+            ae.p_kernel_width_geometry = float(ae.p_kernel_width_geometry)
+            ae.p_kernel_width_deformation =  float(ae.p_kernel_width_deformation)
+            ae.p_noise =  float(ae.p_noise)
+        else:
 
-        self.odir = __get_input_path("Set output directory", self.odir)
-        #sp.call(["mkdir", "-p", self.odir])
-        #print("output directory created: ", self.odir)
+            self.idir = __get_input_path("Set input directory", self.idir, True)
+            print(len(self.__get_list_vtk()), "vtk-files in input directory")
 
-        try:
-            k = int(self.initial_guess)
-            self.initial_guess = self.get_path_data(k)
-        except ValueError:
-            pass
+            self.odir = __get_input_path("Set output directory", self.odir)
+            #sp.call(["mkdir", "-p", self.odir])
+            #print("output directory created: ", self.odir)
 
-        self.initial_guess = __get_input_path("Set initial mesh", self.initial_guess)
-        self.optimization_parameters_xml = __get_input_path("Set optimization xml",self.optimization_parameters_xml)
-        self.model_xml = __get_input_path("Set model xml",self.model_xml)
+            try:
+                k = int(self.initial_guess)
+                self.initial_guess = self.get_path_data(k)
+            except ValueError:
+                pass
 
-        self.p_kernel_width_geometry = __get_input_float('Set kernel width geometry: ', self.p_kernel_width_geometry)
-        self.p_kernel_width_deformation =  __get_input_float('Set kernel width deformation: ', self.p_kernel_width_deformation)
-        self.p_noise =  __get_input_float('Set noise level: ', self.p_noise)
+            self.initial_guess = __get_input_path("Set initial mesh", self.initial_guess)
+            self.optimization_parameters_xml = __get_input_path("Set optimization xml",self.optimization_parameters_xml)
+            self.model_xml = __get_input_path("Set model xml",self.model_xml)
+
+            self.p_kernel_width_geometry = __get_input_float('Set kernel width geometry: ', self.p_kernel_width_geometry)
+            self.p_kernel_width_deformation =  __get_input_float('Set kernel width deformation: ', self.p_kernel_width_deformation)
+            self.p_noise =  __get_input_float('Set noise level: ', self.p_noise)
 
     def get_path_data(self, k):
         """ path of data of subject k """
