@@ -102,9 +102,19 @@ class DeformetricaAtlasPCA():
             fig.savefig(self.odir + "fig_pca_inertia.png")
         return fig
 
-    def plot_pca_projection(self, axes=(0,1,2,3), save_fig=True, color=None, labels=None, nmaxlabels=100, cmap=None):
-        """ plot projection along the 4 first axes """
+    def plot_pca_projection(self, axes=(0,1,2,3), save_fig=True, color=None, size=30, labels=None, nmaxlabels=100, cmap=None):
+        """
+        plot projection along the 4 axes
+        axes,       tuple (4,) axes to show the projection on
+        save_fig,   bool       does it save the figure as "fig_pca_projection.png"?
+        color,      array (N,) to color the points
+        labels,     bool or array (N,)
+        nmaxlabels  int       number maximum of labels, labels points away from the center first
+        cmap        matplotlib colormap
 
+        return
+        fig
+        """
         matplotlib.rcParams.update({'font.size': 16})
 
         fig, (ax0,ax1) = plt.subplots(1,2, figsize=(12, 5), constrained_layout=True)
@@ -118,8 +128,8 @@ class DeformetricaAtlasPCA():
             ax0.plot(x1, y1, ".", ms=7)
             ax1.plot(x2, y2, ".", ms=7)
         else:
-            mp = ax0.scatter(x1, y1, c=color, s=30, cmap=cmap)
-            mp = ax1.scatter(x2, y2, c=color, s=30, cmap=cmap)
+            mp = ax0.scatter(x1, y1, c=color, s=size, cmap=cmap)
+            mp = ax1.scatter(x2, y2, c=color, s=size, cmap=cmap)
             fig.colorbar(mp)
 
         if labels:
