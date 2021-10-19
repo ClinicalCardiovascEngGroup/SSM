@@ -87,7 +87,9 @@ class DeformetricaAtlasEstimation():
             "init":self.initial_guess,
             "kwd":self.p_kernel_width_deformation,
             "kwg":self.p_kernel_width_geometry,
-            "noise":self.p_noise
+            "noise":self.p_noise,
+            "object_type":self.object_type,
+            "attachment":self.attachment,
             }
         with open(os.path.join(self.odir, "params.json"), "w") as fd:
             json.dump(d, fd, indent=2)
@@ -104,6 +106,11 @@ class DeformetricaAtlasEstimation():
             self.p_kernel_width_deformation = d["kwd"]
             self.p_kernel_width_geometry = d["kwg"]
             self.p_noise = d["noise"]
+            try:
+                self.object_type = d["object_type"]
+                self.attachment = d["attachment"]
+            except KeyError:
+                pass
         if do_load_lf:
             self.lf = self.__get_list_vtk(sorted=True)
 
@@ -195,6 +202,10 @@ class DeformetricaAtlasEstimation():
         sp.call(["mkdir", "-p", self.odir])
         self.create_dataset_xml()
 
+        if len(self.lf) == 0:
+            print("no input data for estimation!")
+            return
+
         # General parameters
         xml_parameters = deformetrica.in_out.XmlParameters()
         xml_parameters._read_optimization_parameters_xml(self.optimization_parameters_xml)
@@ -220,7 +231,6 @@ class DeformetricaAtlasEstimation():
         template_object['deformable_object_type'] = self.object_type
         template_object['attachment_type'] = self.attachment
         template_object['kernel_type'] = 'torch'
-        template_object ['kernel_device'] = 'gpu'
 
         template_object['noise_std'] =  self.p_noise
         template_object['filename'] = os.path.abspath(self.initial_guess)
@@ -239,10 +249,9 @@ class DeformetricaAtlasEstimation():
             model_options=deformetrica.in_out.get_model_options(xml_parameters))
 
 
-
         ## cleaning a bit the deformetrica output
         if not do_keep_all:
-            sp.call("rm "+odir+"DeterministicAtlas__flow__*.vtk", shell=True)
+            sp.call("rm " + odir + "DeterministicAtlas__flow__*.vtk", shell=True)
 
 
     def shooting(self, fv, odir, tmin=-5, tmax=+5, fmesh=None, do_keep_all=False, concentration_of_time_points=4):
@@ -321,7 +330,6 @@ class DeformetricaAtlasEstimation():
         template_object['deformable_object_type'] = self.object_type
         template_object['attachment_type'] = self.attachment
         template_object['kernel_type'] = 'torch'
-        template_object ['kernel_device'] = 'gpu'
         template_object['noise_std'] =  self.p_noise
         template_object['kernel_width'] = self.p_kernel_width_geometry
 
@@ -433,7 +441,7 @@ class DeformetricaAtlasEstimation():
     def read_template(self):
         """ return polydata of the template """
         ft = self.odir + "output/DeterministicAtlas__EstimatedParameters__Template_{}.vtk".format(self.id)
-        ft = os.path.abspath(ft).encode()
+        ft = os.path.abspath(ft)
         return iovtk.ReadPolyData(ft)
 
     def read_momenta(self):
