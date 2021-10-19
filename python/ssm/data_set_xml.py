@@ -36,38 +36,43 @@ def create_xml_atlas(lfiles, foxml, oid="face"):
     with open(foxml, "w") as fo:
         fo.write(doc.toprettyxml())
 
-def create_xml_longitudinal_atlas(lfiles, lsbj, foxml):
-    """ take a list of files, create a xml file data_set.xml """
+def create_xml_longitudinal_atlas(lsbjs, foxml, obj_id="geom"):
+    """
+    take a list of files, create a xml file data_set.xml
+    lsbjs: list dict 'id' (str), 'ages' , 'filenames' (list)
+    """
 
     impl = xml.dom.minidom.getDOMImplementation()
     doc = impl.createDocument(None, "some_tag", None)
     top_element = doc.documentElement
 
-    for i, fn in enumerate(lfiles):
+    for s in lsbjs:
+
         e = doc.createElement('subject')
-        e.setAttribute('id', "subj{}".format(i))
+        e.setAttribute('id', s["id"])
 
-        v = doc.createElement('visit')
-        v.setAttribute('id', "experiment")
+        for i, time, fn in zip(range(100), s["ages"], s["filenames"]):
+            v = doc.createElement('visit')
+            v.setAttribute('id', "acq{}".format(i))
 
-        f = doc.createElement('filename')
-        f.setAttribute('object_id', "face")
+            f = doc.createElement('filename')
+            f.setAttribute('object_id', obj_id)
+            f.appendChild(doc.createTextNode(fn))
 
-        a = doc.createElement('age')
-        x = doc.createTextNode(str(lsbj[i]["age"]))
-        a.appendChild(x)
+            a = doc.createElement('age')
+            a.appendChild(doc.createTextNode(str(time)))
 
-        t = doc.createTextNode(fn)
-
-        f.appendChild(t)
-        v.appendChild(f)
-        v.appendChild(a)
-        e.appendChild(v)
+            v.appendChild(f)
+            v.appendChild(a)
+            e.appendChild(v)
 
         top_element.appendChild(e)
 
     with open(foxml, "w") as fo:
         fo.write(doc.toprettyxml())
+
+
+
 
 def create_xml_regression(lfiles, lsbj, foxml):
     """
