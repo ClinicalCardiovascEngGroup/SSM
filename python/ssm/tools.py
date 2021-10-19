@@ -153,46 +153,6 @@ def apply_transform(transform, mesh):
 
 
 ################################################################################
-##  Mesh distance
-
-def polydata_distance(mflo, mref, do_signed=True):
-    """ distance from mflo to mref """
-    pdd = vtk.vtkDistancePolyDataFilter()
-    pdd.SetSignedDistance(do_signed) #pdd.SignedDistanceOff()
-    pdd.SetInputData(0, mflo)
-    pdd.SetInputData(1, mref)
-
-    pdd.Update()
-    return pdd.GetOutput()
-
-
-def polydata_distance_on_ref(mflo, mref, mtpl, do_signed=True):
-    """ distance from mflo to mref recorded on mtpl
-    mflo and mtpl must have same number (and matching) points
-    """
-    mout = vtk.vtkPolyData()
-    mout.DeepCopy(mtpl)
-
-    pdd = vtk.vtkImplicitPolyDataDistance()
-    pdd.SetInput(mref)
-
-    numPts = mflo.GetNumberOfPoints()
-    distArray = vtk.vtkDoubleArray()
-    distArray.SetName("Distance")
-    distArray.SetNumberOfComponents(1)
-    distArray.SetNumberOfTuples(numPts)
-    for i in range(numPts):
-        pt = mflo.GetPoint(i)
-        d = pdd.EvaluateFunction(pt)
-        if do_signed:
-            distArray.SetValue(i, d)
-        else:
-            distArray.SetValue(i, np.abs(d))
-
-    mout.GetPointData().AddArray(distArray)
-    return mout
-
-################################################################################
 ### Flipping mesh
 def flipx(pd, c):
     """ flip mesh along x-axis and center c (only cx matters) """
