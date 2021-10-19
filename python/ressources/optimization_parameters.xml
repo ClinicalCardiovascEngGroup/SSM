@@ -6,4 +6,5 @@
     <freeze-template>Off</freeze-template>
     <freeze-control-points>On</freeze-control-points>
     <number-of-processes>1</number-of-processes>
+    <memory-length>1</memory-length>
 </optimization-parameters>
