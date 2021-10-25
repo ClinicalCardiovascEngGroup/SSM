@@ -173,6 +173,12 @@ class DeformetricaAtlasEstimation():
             self.p_kernel_width_deformation =  __get_input_float('Set kernel width deformation: ', self.p_kernel_width_deformation)
             self.p_noise =  __get_input_float('Set noise level: ', self.p_noise)
 
+    def get_n_subjects(self):
+        try:
+            return len(self.lf[k])
+        except:
+            return 0
+
     def get_path_data(self, k):
         """ path of data of subject k """
         if self.lf is None:
@@ -251,7 +257,10 @@ class DeformetricaAtlasEstimation():
 
         ## cleaning a bit the deformetrica output
         if not do_keep_all:
-            sp.call("rm " + odir + "DeterministicAtlas__flow__*.vtk", shell=True)
+            if odir.find(" ") == -1:
+                sp.call("rm " + odir + "DeterministicAtlas__flow__*.vtk", shell=True)
+            else:
+                print("cannot remove flow files because of ' '")
 
 
     def shooting(self, fv, odir, tmin=-5, tmax=+5, fmesh=None, do_keep_all=False, concentration_of_time_points=4):
