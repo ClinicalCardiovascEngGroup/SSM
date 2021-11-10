@@ -3,11 +3,7 @@
 
 
 """
-Mesh processing tools (vtk) for atlas estimation
-
-- Rigid/similitud registration (using vtkIterativeClosestPoint, vtkTransform)
-- Decimation and clipping
-
+Distances between meshes
 """
 
 import subprocess as sp
