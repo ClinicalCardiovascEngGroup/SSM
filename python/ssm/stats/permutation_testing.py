@@ -12,8 +12,10 @@ threshold for independant testing:
 
 import numpy as np
 
-from .statistics import hotelling_2samples, fisher_2samples, regression_loglikelihood
+from .statistics import *
 
+
+################################################################################
 
 
 def zmap_1perm_2samp(X, cat1, cat2=None, rand_seed=-1, fstat=None, name=None):
@@ -64,7 +66,7 @@ def zval_kperm_2samp(X, cat1, cat2=None, nperm=100, fstat=None):
     lmin = np.zeros((nperm,))
     lmax = np.zeros((nperm,))
     for i in range(nperm):
-        Y0 = aux_1perm_multivariate(X, cat1, cat2, rand_seed=i, fstat=fstat)
+        Y0 = zmap_1perm_2samp(X, cat1, cat2, rand_seed=i, fstat=fstat)
         lmax[i] = Y0.max()
         lmin[i] = Y0.min()
     lmax.sort()
@@ -110,13 +112,15 @@ def zval_kperm_2pairedsamp(X, nperm):
     lmin = np.zeros((nperm,))
     lmax = np.zeros((nperm,))
     for i in range(nperm):
-        Y0 = aux_1perm(X, rand_seed=i)
+        Y0 = zmap_1perm_2pairedsamp(X, rand_seed=i)
         lmax[i] = Y0.max()
         lmin[i] = Y0.min()
     lmax.sort()
     lmin.sort()
     return lmin, lmax
 
+
+################################################################################
 
 def zmap_kperm_llh(X, y, nperm, nvar0=1):
     """

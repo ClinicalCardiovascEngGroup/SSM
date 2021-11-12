@@ -152,7 +152,7 @@ def regression_loglikelihood(X, y):
     """
     n, d, _ = X.shape
 
-    Z = np.zeros((d,)))
+    Z = np.zeros((d,))
     for i in range(d):
         x = X[:, i, :]
 
