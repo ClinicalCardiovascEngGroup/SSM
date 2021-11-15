@@ -129,10 +129,10 @@ def fisher_2samples(x, y, joint_mean=True):
         mx = x.mean(axis=1)
         mx = mx[:, np.newaxis, :]
 
-        my = x.mean(axis=1)
+        my = y.mean(axis=1)
         my = my[:, np.newaxis, :]
 
-    z = ((nx - 1) / (ny - 1)) * np.sum((x-mx)**2, axis=(1,2)) / np.sum((y-my)**2, axis=(1,2))
+    z = ((ny - 1) / (nx - 1)) * np.sum((x-mx)**2, axis=(1,2)) / np.sum((y-my)**2, axis=(1,2))
     return z
 
 
