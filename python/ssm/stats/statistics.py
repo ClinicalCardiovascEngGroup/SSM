@@ -155,9 +155,8 @@ def regression_loglikelihood(X, y):
     Z = np.zeros((d,))
     for i in range(d):
         x = X[:, i, :]
-
         A, _,_,_ = np.linalg.lstsq(y, x, rcond=None)
         E = x - y@A
         Z[i] = -(n/2) * np.log(np.linalg.det(E.T @ E))
 
-    return z
+    return Z

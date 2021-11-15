@@ -126,15 +126,15 @@ def zmap_kperm_llh(X, y, nperm, nvar0=1):
     """
     WIP
     log-likelihood testing for non parametric permutation regression testing
-
-    quick and dirty for now
-    return L (d, nperm+1) with L[:, 0] for no-permutation
     nvar0 is used to set the reference model
 
     X (n, d, p) deformation
     y (n, q)    clinicals
 
-    return L (d, nperm+1)
+    return
+    L (d, nperm+1)
+    L[:, 0],                   no-permutation map
+    np.max(L[:, 1:], axis=0)   permutation maxs
     """
     n, d, p = X.shape
     K = np.zeros((d, 1))
@@ -152,7 +152,8 @@ def zmap_kperm_llh(X, y, nperm, nvar0=1):
         yp[:, nvar0:] = y[per, nvar0:]
         L[:, k+1] = regression_loglikelihood(X, yp)
 
-    return L - K
+    L = L - K
+    return L, L[:, 0], np.max(L[:, 1:], axis=0)
 
 
 
