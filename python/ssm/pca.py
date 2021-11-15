@@ -102,7 +102,7 @@ class DeformetricaAtlasPCA():
             fig.savefig(self.odir + "fig_pca_inertia.png")
         return fig
 
-    def plot_pca_projection(self, axes=(0,1,2,3), save_fig=True, color=None, size=30, labels=None, nmaxlabels=100, cmap=None):
+    def plot_pca_projection(self, axes=(0,1,2,3), save_fig=True, color=None, size=30, labels=None, nmaxlabels=100, cmap=None, **kwargs):
         """
         plot projection along the 4 axes
         axes,       tuple (4,) axes to show the projection on
@@ -110,7 +110,8 @@ class DeformetricaAtlasPCA():
         color,      array (N,) to color the points
         labels,     bool or array (N,)
         nmaxlabels  int       number maximum of labels, labels points away from the center first
-        cmap        matplotlib colormap
+        kwargs is used to pass arguments to ax.scatter
+                (in particular matplotlib colormap cmap and vmin/vmax)
 
         return
         fig
@@ -128,8 +129,8 @@ class DeformetricaAtlasPCA():
             ax0.plot(x1, y1, ".", ms=7)
             ax1.plot(x2, y2, ".", ms=7)
         else:
-            mp = ax0.scatter(x1, y1, c=color, s=size, cmap=cmap)
-            mp = ax1.scatter(x2, y2, c=color, s=size, cmap=cmap)
+            mp = ax0.scatter(x1, y1, c=color, s=size, **kwargs)
+            mp = ax1.scatter(x2, y2, c=color, s=size, **kwargs)
             fig.colorbar(mp)
 
         if labels:
