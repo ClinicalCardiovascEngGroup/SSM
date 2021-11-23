@@ -102,7 +102,7 @@ class DeformetricaAtlasPCA():
             fig.savefig(self.odir + "fig_pca_inertia.png")
         return fig
 
-    def plot_pca_projection(self, axes=(0,1,2,3), save_fig=True, color=None, size=30, labels=None, nmaxlabels=100, cmap=None, **kwargs):
+    def plot_pca_projection(self, axes=(0,1,2,3), save_fig=True, color=None, size=30, labels=None, nmaxlabels=100, **kwargs):
         """
         plot projection along the 4 axes
         axes,       tuple (4,) axes to show the projection on
