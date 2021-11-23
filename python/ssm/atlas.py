@@ -67,7 +67,7 @@ class DeformetricaAtlasEstimation():
         self.optimization_parameters_xml = os.path.join(os.path.dirname(__file__), "../ressources/optimization_parameters.xml")
         self.model_xml = os.path.join(os.path.dirname(__file__), "../ressources/model-atlas-template.xml")
 
-    def __get_list_vtk(self, sorted=False):
+    def _get_list_vtk(self, sorted=False):
         """ list of vtk using prefix in self.idir """
         lf = []
         if os.path.isdir(self.idir):
@@ -112,13 +112,13 @@ class DeformetricaAtlasEstimation():
             except KeyError:
                 pass
         if do_load_lf:
-            self.lf = self.__get_list_vtk(sorted=True)
+            self.lf = self._get_list_vtk(sorted=True)
 
 
     def check_initialisation(self, do_quick=False):
         """ check that the input paths exist """
 
-        def __get_input_path(s, p, pass_check=False):
+        def _get_input_path(s, p, pass_check=False):
             """ ask for a path using string s and default value p """
             while True:
                 x = input(s + " [{}]: ".format(p))
@@ -130,7 +130,7 @@ class DeformetricaAtlasEstimation():
                 else:
                     print("path {} does not exist".format(x))
 
-        def __get_input_float(s, p):
+        def _get_input_float(s, p):
             """ ask for a float using string s and default value p """
             while True:
                 try:
@@ -152,10 +152,10 @@ class DeformetricaAtlasEstimation():
             ae.p_noise =  float(ae.p_noise)
         else:
 
-            self.idir = __get_input_path("Set input directory", self.idir, True)
-            print(len(self.__get_list_vtk()), "vtk-files in input directory")
+            self.idir = _get_input_path("Set input directory", self.idir, True)
+            print(len(self._get_list_vtk()), "vtk-files in input directory")
 
-            self.odir = __get_input_path("Set output directory", self.odir)
+            self.odir = _get_input_path("Set output directory", self.odir)
             #sp.call(["mkdir", "-p", self.odir])
             #print("output directory created: ", self.odir)
 
@@ -165,30 +165,30 @@ class DeformetricaAtlasEstimation():
             except ValueError:
                 pass
 
-            self.initial_guess = __get_input_path("Set initial mesh", self.initial_guess)
-            self.optimization_parameters_xml = __get_input_path("Set optimization xml",self.optimization_parameters_xml)
-            self.model_xml = __get_input_path("Set model xml",self.model_xml)
+            self.initial_guess = _get_input_path("Set initial mesh", self.initial_guess)
+            self.optimization_parameters_xml = _get_input_path("Set optimization xml",self.optimization_parameters_xml)
+            self.model_xml = _get_input_path("Set model xml",self.model_xml)
 
-            self.p_kernel_width_geometry = __get_input_float('Set kernel width geometry: ', self.p_kernel_width_geometry)
-            self.p_kernel_width_deformation =  __get_input_float('Set kernel width deformation: ', self.p_kernel_width_deformation)
-            self.p_noise =  __get_input_float('Set noise level: ', self.p_noise)
+            self.p_kernel_width_geometry = _get_input_float('Set kernel width geometry: ', self.p_kernel_width_geometry)
+            self.p_kernel_width_deformation =  _get_input_float('Set kernel width deformation: ', self.p_kernel_width_deformation)
+            self.p_noise =  _get_input_float('Set noise level: ', self.p_noise)
 
     def get_n_subjects(self):
         try:
-            return len(self.lf[k])
+            return len(self.lf)
         except:
             return 0
 
     def get_path_data(self, k):
         """ path of data of subject k """
         if self.lf is None:
-            self.lf = self.__get_list_vtk(sorted=True)
+            self.lf = self._get_list_vtk(sorted=True)
         return self.lf[k]
 
     def create_dataset_xml(self):
         """ with every vtk files in idir """
         if self.lf is None:
-            self.lf = self.__get_list_vtk(sorted=True)
+            self.lf = self._get_list_vtk(sorted=True)
         self.dataset_xml = os.path.join(self.odir, "dataset.xml")
         data_set_xml.create_xml_atlas(self.lf, self.dataset_xml, self.id)
 
@@ -314,9 +314,13 @@ class DeformetricaAtlasEstimation():
                 model_options=deformetrica.in_out.get_model_options(xml_parameters))
 
         if not do_keep_all:
-            visualization_tools.rename_df2pv(odir + "Shooting__GeodesicFlow__" + self.id)
-            sp.call("rm "+odir+"Shooting__GeodesicFlow__ControlPoints__tp*.txt", shell=True)
-            sp.call("rm "+odir+"Shooting__GeodesicFlow__Momenta__tp*.txt", shell=True)
+            if odir.find(" ") == -1:
+                visualization_tools.rename_df2pv(odir + "Shooting__GeodesicFlow__" + self.id)
+                sp.call("rm "+odir+"Shooting__GeodesicFlow__ControlPoints__tp*.txt", shell=True)
+                sp.call("rm "+odir+"Shooting__GeodesicFlow__Momenta__tp*.txt", shell=True)
+            else:
+                print("cannot remove flow files because of ' '")
+
 
     def registration(self, fmesh, odir, subject_id="subj"):
         """
@@ -473,8 +477,6 @@ class DeformetricaAtlasEstimation():
         render the norm of the momenta on the template geometry
         moments.shape = (ncp, k)
         """
-
-        # read mesh
         v_pd = self.read_template()
         N = v_pd.GetPoints().GetNumberOfPoints()
         points = nps.vtk_to_numpy(v_pd.GetPoints().GetData()).astype('float64')
