@@ -47,7 +47,7 @@ class DeformetricaAtlasEstimation():
 
     def __init__(self, idir="./", odir="output/", name="obj", initial_guess="", kwd=20., kwg=10., noise=10.):
         self.idir = idir
-        self.lf = None
+        self._lf = None
         self.odir = odir
         self.id = name
         self.object_type = 'surfacemesh'
@@ -69,7 +69,6 @@ class DeformetricaAtlasEstimation():
 
     def _get_list_vtk(self, sorted=False):
         """ list of vtk using prefix in self.idir """
-        lf = []
         if os.path.isdir(self.idir):
             lf = glob.glob(os.path.join(self.idir, "*.vtk"))
         else:
@@ -78,6 +77,22 @@ class DeformetricaAtlasEstimation():
         if sorted:
             lf.sort()
         return lf
+
+    @property
+    def lf(self):
+        if self._lf is None:
+            self._lf = self._get_list_vtk(sorted=True)
+        return self._lf
+    @lf.setter
+    def lf(self, l):
+        self._lf = l
+
+
+    def get_n_subjects(self):
+        try:
+            return len(self.lf)
+        except:
+            return 0
 
     def save_parameters(self):
         """ printing parameters in a json for future use if need be """
@@ -94,7 +109,7 @@ class DeformetricaAtlasEstimation():
         with open(os.path.join(self.odir, "params.json"), "w") as fd:
             json.dump(d, fd, indent=2)
 
-    def load_parameters(self, fjson, do_load_lf=False):
+    def load_parameters(self, fjson):
         """loading parameters from a json"""
         with open(fjson, "r") as fd:
             d = json.load(fd)
@@ -111,8 +126,7 @@ class DeformetricaAtlasEstimation():
                 self.attachment = d["attachment"]
             except KeyError:
                 pass
-        if do_load_lf:
-            self.lf = self._get_list_vtk(sorted=True)
+        self._lf = None
 
 
     def check_initialisation(self, do_quick=False):
@@ -173,22 +187,10 @@ class DeformetricaAtlasEstimation():
             self.p_kernel_width_deformation =  _get_input_float('Set kernel width deformation: ', self.p_kernel_width_deformation)
             self.p_noise =  _get_input_float('Set noise level: ', self.p_noise)
 
-    def get_n_subjects(self):
-        try:
-            return len(self.lf)
-        except:
-            return 0
 
-    def get_path_data(self, k):
-        """ path of data of subject k """
-        if self.lf is None:
-            self.lf = self._get_list_vtk(sorted=True)
-        return self.lf[k]
 
     def create_dataset_xml(self):
         """ with every vtk files in idir """
-        if self.lf is None:
-            self.lf = self._get_list_vtk(sorted=True)
         self.dataset_xml = os.path.join(self.odir, "dataset.xml")
         data_set_xml.create_xml_atlas(self.lf, self.dataset_xml, self.id)
 
@@ -208,7 +210,7 @@ class DeformetricaAtlasEstimation():
         sp.call(["mkdir", "-p", self.odir])
         self.create_dataset_xml()
 
-        if len(self.lf) == 0:
+        if self.get_n_subjects() == 0:
             print("no input data for estimation!")
             return
 
