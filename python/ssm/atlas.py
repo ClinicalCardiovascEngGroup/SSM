@@ -87,14 +87,14 @@ class DeformetricaAtlasEstimation():
     def lf(self, l):
         self._lf = l
 
-
-    def get_n_subjects(self):
+    @property
+    def n_subjects(self):
         try:
             return len(self.lf)
         except:
             return 0
 
-    def save_parameters(self):
+    def save_parameters(self, do_save_lvtk=False):
         """ printing parameters in a json for future use if need be """
         d = {"idir":self.idir,
             "odir":self.odir,
@@ -104,8 +104,10 @@ class DeformetricaAtlasEstimation():
             "kwg":self.p_kernel_width_geometry,
             "noise":self.p_noise,
             "object_type":self.object_type,
-            "attachment":self.attachment,
+            "attachment":self.attachment
             }
+        if do_save_lvtk:
+            d.update({"files":self.lf})
         with open(os.path.join(self.odir, "params.json"), "w") as fd:
             json.dump(d, fd, indent=2)
 
@@ -113,7 +115,7 @@ class DeformetricaAtlasEstimation():
         """loading parameters from a json"""
         with open(fjson, "r") as fd:
             d = json.load(fd)
-            print("loading parameters: ", d)
+
             self.idir = d["idir"]
             self.odir = d["odir"]
             self.id = d["name"]
@@ -122,11 +124,17 @@ class DeformetricaAtlasEstimation():
             self.p_kernel_width_geometry = d["kwg"]
             self.p_noise = d["noise"]
             try:
+                self.lf = d["files"]
+                if len(d["files"]) > 5:
+                    d["files"] = "[{} listed files, ...]".format(len(d["files"]))
+            except KeyError:
+                pass
+            try:
                 self.object_type = d["object_type"]
                 self.attachment = d["attachment"]
             except KeyError:
                 pass
-        self._lf = None
+            print("loading parameters: ", d)
 
 
     def check_initialisation(self, do_quick=False):
@@ -210,7 +218,7 @@ class DeformetricaAtlasEstimation():
         sp.call(["mkdir", "-p", self.odir])
         self.create_dataset_xml()
 
-        if self.get_n_subjects() == 0:
+        if self.n_subjects == 0:
             print("no input data for estimation!")
             return
 
@@ -260,7 +268,9 @@ class DeformetricaAtlasEstimation():
         ## cleaning a bit the deformetrica output
         if not do_keep_all:
             if odir.find(" ") == -1:
-                sp.call("rm " + odir + "DeterministicAtlas__flow__*.vtk", shell=True)
+                for f in glob.glob(odir + "DeterministicAtlas__flow__*.vtk"):
+                    sp.call(["rm", f])
+                #sp.call("rm " + , shell=True)
             else:
                 print("cannot remove flow files because of ' '")
 
