@@ -54,7 +54,7 @@ class DeformetricaAtlasEstimation():
         self.attachment = 'current'
 
         if isinstance(initial_guess, int):
-            self.initial_guess = self.get_path_data(initial_guess)
+            self.initial_guess = self.lf[initial_guess]
         else:
             self.initial_guess = initial_guess
 
@@ -108,10 +108,11 @@ class DeformetricaAtlasEstimation():
             }
         if do_save_lvtk:
             d.update({"files":self.lf})
+        sp.call(["mkdir", "-p", self.odir])
         with open(os.path.join(self.odir, "params.json"), "w") as fd:
             json.dump(d, fd, indent=2)
 
-    def load_parameters(self, fjson):
+    def load_parameters(self, fjson, verbose=True):
         """loading parameters from a json"""
         with open(fjson, "r") as fd:
             d = json.load(fd)
@@ -134,7 +135,11 @@ class DeformetricaAtlasEstimation():
                 self.attachment = d["attachment"]
             except KeyError:
                 pass
-            print("loading parameters: ", d)
+
+            if verbose:
+                print("loading parameters: ")
+                for k in d:
+                    print("  {:6}: {}".format(k, d[k]))
 
 
     def check_initialisation(self, do_quick=False):
@@ -166,7 +171,7 @@ class DeformetricaAtlasEstimation():
         if do_quick:
             try:
                 k = int(self.initial_guess)
-                self.initial_guess = self.get_path_data(k)
+                self.initial_guess = self.lf[k]
             except ValueError:
                 pass
             ae.p_kernel_width_geometry = float(ae.p_kernel_width_geometry)
@@ -183,7 +188,7 @@ class DeformetricaAtlasEstimation():
 
             try:
                 k = int(self.initial_guess)
-                self.initial_guess = self.get_path_data(k)
+                self.initial_guess = self.lf[k]
             except ValueError:
                 pass
 
@@ -383,17 +388,32 @@ class DeformetricaAtlasEstimation():
 
     def momenta_from_sbj_to_atlas(self, sbj, odir, do_warpback=False):
         """
-        forward-backward shooting to invert the atlas-subject deformation
+        special case of forward-backward shooting to invert the atlas-subject deformation
         sbj         subject id (int)
 
         return file_moment, file_ctrlpts
         """
+        m = self.read_momenta()[sbj, :, :]
+        if do_warpback:
+            mesh = self.lf[sbj]
+        else:
+            mesh = None
+        return self.apply_reverse_transform(m, mesh, odir)
+
+    def apply_reverse_transform(self, momentum, fmesh, odir):
+        """
+        forward-backward shooting to invert the atlas-subject deformation
+        momentum, array
+        mesh, path (can be None)
+
+        return file_moment, file_ctrlpts
+        """
+
         sp.call(["mkdir", "-p", odir])
         ipfx = self.odir + "output/DeterministicAtlas__EstimatedParameters__"
 
         # moment
-        m = self.read_momenta()
-        np.savetxt(odir + "forward_momenta.txt", m[sbj, :, :])
+        np.savetxt(odir + "forward_momenta.txt", momentum)
 
         # forward to get end momenta
         template_specifications = {
@@ -419,11 +439,11 @@ class DeformetricaAtlasEstimation():
         sp.call(["cp", odir + "forward/Shooting__GeodesicFlow__ControlPoints__tp_10__age_1.00.txt", odir + "backward_ctrlpts.txt"])
 
         # backward shooting (could be manually applied to other meshes!)
-        if do_warpback:
+        if os.path.exists(fmesh):
             template_specifications = {
                 self.id: {'deformable_object_type': self.object_type,
                 'noise_std': self.p_noise,
-                'filename': self.get_path_data(sbj)}
+                'filename': fmesh}
             }
             model_options={
                 'dimension': 3,
@@ -438,6 +458,8 @@ class DeformetricaAtlasEstimation():
             Deformetrica.compute_shooting(template_specifications, model_options=model_options)
 
         return odir + "backward_momenta.txt", odir +  "backward_ctrlpts.txt"
+
+
 
 
     def convolve_momentum(self, m, x):
@@ -480,14 +502,24 @@ class DeformetricaAtlasEstimation():
 
     def save_controlpoints_vtk(self, fname="controlpoints.vtk", X=None):
         """ save controlpoints (could add some momenta X (n, d)) as vtk point cloud """
+        if X is not None and X.ndim == 1:
+            X = X.reshape((-1, 1)).astype("float")
         ctrlpts = self.read_ctrlpoints()
         vtkp = iovtk.controlpoints_to_vtkPoints(ctrlpts, X)
         iovtk.WritePolyData(os.path.normpath(os.path.join(self.odir, fname)), vtkp)
 
-    def render_momenta_norm(self, moments, do_sq_norm=True, do_render=True):
+
+
+
+    def render_momenta_norm(self, moments, do_weight=False, set_xmax=None, do_sq_norm=True, do_render=False, fname=""):
         """
         render the norm of the momenta on the template geometry
         moments.shape = (ncp, k)
+
+        do_weight   normalize the result such that constant moments lead to a constant map
+        do_sq_norm  L2 norm of the momenta (otherwise show x[0])
+        do_render   vtk live render
+        fname       if set, save the resulting polydata
         """
         v_pd = self.read_template()
         N = v_pd.GetPoints().GetNumberOfPoints()
@@ -497,10 +529,17 @@ class DeformetricaAtlasEstimation():
         z = self.convolve_momentum(moments, points)
         print(z.shape)
 
+        if do_weight:
+            w = self.convolve_momentum(np.ones((moments.shape[0], 1)), points)
+            z = z/w
+
         if do_sq_norm:
             d = np.sum(z**2, axis=1)
         else:
             d = z[:, 0]
+
+        if set_xmax is not None:
+            d *= set_xmax / d.max()
 
         # set attributes
         scalars = vtk.vtkFloatArray()
@@ -511,5 +550,24 @@ class DeformetricaAtlasEstimation():
         # render
         if do_render:
             visualization_tools.renderVtkPolyData(v_pd, vmin=min(0, d.min()), vmax=d.max())
+        if len(fname): #isinstance(do_save, str)
+            iovtk.WritePolyData(self.odir + fname, v_pd)
 
         return v_pd
+
+    def plot_loglikelihood(self):
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        flogs = glob.glob(self.odir + "output/*.log")
+        if len(flogs) == 0:
+            print("no log file in:", self.odir + "output/")
+            return fig, []
+        elif len(flogs) > 1:
+            print("several log files: ", flogs)
+
+        ll = visualization_tools.read_loglikelihood_from_log(flogs[0])
+        lll = np.log(-1 * np.array(ll))
+        ax.plot(lll, ".");
+
+        print("last =", "{:.4f}".format(lll[-2] - lll[-1])) # 1 - exp(-x) ~ x
+        return fig, ll
