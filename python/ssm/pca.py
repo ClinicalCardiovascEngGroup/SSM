@@ -77,6 +77,23 @@ class DeformetricaAtlasPCA():
             self.plot_pca_inertia()
             self.plot_pca_projection()
 
+    def predict_low_dim(self, u=None, N=None):
+        """
+        low dimensional prediction
+        u (n, s.size) [default self.pca_u]
+        N number of dimension to use [default all=s.size]
+
+        return M0 (n, nctrlpoints, 3)
+         """
+        if u is None:
+            u = self.pca_u
+        if N is None:
+            N = self.pca_s.size # full prediction should be exact for training data
+
+        M0 = u @ np.diag(self.pca_s)[:, :N] @ self.pca_v[:N, :]
+        M0 = M0.reshape((u.shape[0], self.pca_v.shape[1]//3, 3))
+        return M0
+
     def plot_pca_inertia(self, save_fig=True):
         """ plot inertia and cumulative variance of pca modes """
 
@@ -102,7 +119,7 @@ class DeformetricaAtlasPCA():
             fig.savefig(self.odir + "fig_pca_inertia.png")
         return fig
 
-    def plot_pca_projection(self, axes=(0,1,2,3), save_fig=True, color=None, size=30, labels=None, nmaxlabels=100, **kwargs):
+    def plot_pca_projection(self, axes=(0,1,2,3), save_fig=True, color=None, size=30, labels=None, nmaxlabels=100, with_scale=True, **kwargs):
         """
         plot projection along the 4 axes
         axes,       tuple (4,) axes to show the projection on
@@ -120,10 +137,17 @@ class DeformetricaAtlasPCA():
 
         fig, (ax0,ax1) = plt.subplots(1,2, figsize=(12, 5), constrained_layout=True)
 
-        x1 = self.pca_s[axes[0]]*self.pca_u[:, axes[0]]
-        y1 = self.pca_s[axes[1]]*self.pca_u[:, axes[1]]
-        x2 = self.pca_s[axes[2]]*self.pca_u[:, axes[2]]
-        y2 = self.pca_s[axes[3]]*self.pca_u[:, axes[3]]
+        if with_scale:
+            x1 = self.pca_s[axes[0]]*self.pca_u[:, axes[0]]
+            y1 = self.pca_s[axes[1]]*self.pca_u[:, axes[1]]
+            x2 = self.pca_s[axes[2]]*self.pca_u[:, axes[2]]
+            y2 = self.pca_s[axes[3]]*self.pca_u[:, axes[3]]
+        else:
+            sigma = 1 / np.sqrt(ao.pca_u.shape[0]) # approx std if centered
+            x1 = self.pca_u[:, axes[0]] / sigma
+            y1 = self.pca_u[:, axes[1]] / sigma
+            x2 = self.pca_u[:, axes[2]] / sigma
+            y2 = self.pca_u[:, axes[3]] / sigma
 
         if color is None:
             ax0.plot(x1, y1, ".", ms=7)
@@ -169,6 +193,70 @@ class DeformetricaAtlasPCA():
         if save_fig:
             fig.savefig(self.odir + "fig_pca_projection.png")
         return fig
+
+
+    def plot_pca_projection2(self, axes=(0,1), color=None, size=30, labels=None, nmaxlabels=100, **kwargs):
+        """
+        plot projection along the 2 axes
+        axes,       tuple (2,) axes to show the projection on
+        color,      array (N,) to color the points
+        labels,     bool or array (N,)
+        nmaxlabels  int       number maximum of labels, labels points away from the center first
+        kwargs is used to pass arguments to ax.scatter
+                (in particular matplotlib colormap cmap and vmin/vmax)
+
+        return
+        fig
+        """
+        fig, ax = plt.subplots(1,1, figsize=(7, 5))
+
+        sigma = 1 / np.sqrt(self.pca_u.shape[0]) # approx std if centered
+
+        x1 = self.pca_u[:, axes[0]] / sigma
+        y1 = self.pca_u[:, axes[1]] / sigma
+
+        if color is None:
+            ax.plot(x1, y1, ".", ms=7)
+        else:
+            mp = ax.scatter(x1, y1, c=color, s=size, **kwargs)
+            fig.colorbar(mp)
+
+        if labels:
+            N = self.pca_u.shape[0]
+            if isinstance(labels, bool):
+                labels = [str(i) for i in range(N)]
+
+            if (len(labels) == N):
+                d1 = (x1**2 + y1**2)
+                k = N - 1 - nmaxlabels
+                t1 = -1 if k < 0 else np.sort(d1)[k]
+                for i in range(N):
+                    if d1[i]>t1:
+                        ax.text(x1[i], y1[i], labels[i])
+
+        #ax.set_xlabel("pca ax {}".format(axes[0]))
+        #ax.set_ylabel("pca ax {}".format(axes[1]))
+        ax.grid(True)
+
+        ratio = self.pca_s[axes[1]] / self.pca_s[axes[0]]
+        ax.set_aspect(ratio, adjustable='box', anchor='C')
+
+        ax.set_xlim(-3, +3)
+        ax.set_ylim(-3, +3)
+        ax.set_xticks([-2, -1, +1, +2])
+        ax.set_yticks([-2, -1, +1, +2])
+        ax.set_xticklabels(['', '-1$\sigma$', '+1$\sigma$', ''])
+        ax.set_yticklabels(['', '-1$\sigma$', '+1$\sigma$', ''])
+
+        ax.spines['left'].set_position(('data', 0))
+        ax.spines['bottom'].set_position(('data', 0))
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+
+        return fig
+
+
+
 
     def project_subject_on_pca(self, x, labels=False):
         """
