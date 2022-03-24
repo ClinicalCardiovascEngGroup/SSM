@@ -158,17 +158,16 @@ def zmap_kperm_llh(X, y, nperm, nvar0=1):
 
 
 ################################################################################
-def compute_pvalues(zmap, zsamp, alpha_threshold=1., do_sort=True):
+def compute_pvalues(zmap, zsamp, side="right", alpha_threshold=1., do_sort=True):
     """
-    Compute p-values on the right only using:
+    Compute p-values using:
     - zmap   (vdim,)   z-values
     - zsamp  (nsamp,)  empirical z samples
+    - side   'right' or 'left'
 
     return smallest k such that !(zmap[i] > zsamp[k])
 
-    can perform asymetric search on right and left
-
-    (todo voir np.searchsorted)
+    (voir np.searchsorted)
     """
 
     vdim = zmap.size
@@ -179,13 +178,16 @@ def compute_pvalues(zmap, zsamp, alpha_threshold=1., do_sort=True):
     if do_sort:
         zsamp.sort()
 
-    k_threshold = (1. - alpha_threshold)*nsamp
+    if side == "right":
+        pass
+    elif side == "left":
+        zmap = -zmap
+        zsamp = -zsamp[::-1]
+    else:
+        raise ValueError("unrecognized pvalue side {}".format(side))
 
-    pval = np.zeros(vdim, dtype="uint16")
-    for i in range(vdim):
-        k = 0
-        while k < nsamp and zmap[i] > zsamp[k]:
-            k += 1
-        if k >= k_threshold:
-            pval[i] = k
+    pval = np.searchsorted(zsamp, zmap, 'left')
+
+    pval[(pval/nsamp) < (1. - alpha_threshold)] = 0
+
     return pval
