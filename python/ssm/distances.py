@@ -59,3 +59,25 @@ def average_surface_distance(mflo, mref):
     xv = pd.GetPointData().GetArray("Distance")
     xn = nps.vtk_to_numpy(xv)
     return xn.mean()
+
+
+################################################################################
+##  Deformetrica attachment
+def current_distance(fflo, fref, kw, kernel_type="torch"):
+    """
+    current distance between two surface meshes using deformetrica
+    instantiate a torch kernel
+    """
+    import deformetrica
+
+    reader = deformetrica.in_out.DeformableObjectReader()
+    obj1 = reader.create_object(fflo, 'SurfaceMesh', )
+    obj2 = reader.create_object(fref, 'SurfaceMesh', )
+
+    kern = deformetrica.support.kernels.factory(kernel_type, kernel_width=kw)
+
+    # static method
+    # moa = deformetrica.core.model_tools.attachments.MultiObjectAttachment(['current'], [kern])
+    current_distance = deformetrica.core.model_tools.attachments.MultiObjectAttachment.current_distance
+
+    return current_distance(obj1.points, obj1, obj2, kern)
