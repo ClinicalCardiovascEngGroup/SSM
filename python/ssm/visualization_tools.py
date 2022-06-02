@@ -27,19 +27,45 @@ def rename_df2pv(prefix):
         sp.call(["mv", f, prefix + "_tp{:03}.vtk".format(i)])
 
 
-def read_loglikelihood_from_log(flog):
+def read_loglikelihood_from_log(flog, with_it=False):
     """ likehood from deformetrica log file """
     ll = []
+    it = 0
     with open(flog, "r") as fl:
         for l in fl:
-            m = re.search("Log-likelihood = ([+-.E\d]+)", l)
+            m = re.search("Iteration: (\d+)", l)
             if m:
-                try:
-                    x = float(m.group(1))
-                    ll.append(x)
-                except ValueError:
-                    print(m)
+                it = int(m.group(1))
+            else:
+                m = re.search("Log-likelihood = ([+-.E\d]+)", l)
+                if m:
+                    try:
+                        x = float(m.group(1))
+                        if with_it:
+                            ll.append((it, x))
+                        else:
+                            ll.append(x)
+                    except ValueError:
+                        print(m)
     return ll
+
+def plot_loglikelihood(ll):
+    import matplotlib.pyplot as plt
+
+    ll = np.array(ll)
+
+    plt.plot(ll[:, 0], -ll[:, 1], ".");
+    plt.semilogy(base=10)
+    plt.xlabel("iteration")
+    plt.ylabel("- log-likelihood")
+    plt.grid(axis="y", which="major")
+
+    max_llh = ll[:, 1].max()
+    #lll = np.log(-1 * ll[:, 1]) # 1 - exp(-x) ~ x
+
+    print("max llh = {:.1f}".format(max_llh))
+    print("last increment = {:.4f}".format((ll[-2,1] - ll[-1,1])/ll[-1,1]))
+    return
 
 ################################################################################
 ##  vtk 3D rendering
