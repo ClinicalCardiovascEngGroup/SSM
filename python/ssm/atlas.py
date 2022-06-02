@@ -339,10 +339,14 @@ class DeformetricaAtlasEstimation():
                 print("cannot remove flow files because of ' '")
 
 
-    def registration(self, fmesh, odir, subject_id="subj"):
+    def registration(self, fmesh, odir, subject_id="subj", use_template=True, xml_params=None, number_of_time_points=10, ):
         """
         register a (new) subject to the template
-        do not require: idir, initial_guess
+
+
+        use_template is used to choose between:
+            - the estimation results: Template and control points (do not require: idir, initial_guess)
+            - the initial guess: Mesh only (used for simple registration)
         """
 
         # General parameters
@@ -351,21 +355,44 @@ class DeformetricaAtlasEstimation():
         xml_parameters._read_model_xml(self.model_xml)
 
         xml_parameters.model_type = "registration"
-        xml_parameters.initial_control_points = os.path.normpath(
-        os.path.join(self.odir, "output/DeterministicAtlas__EstimatedParameters__ControlPoints.txt"))
-        xml_parameters.freeze_control_points = True
+
+        if use_template:
+            xml_parameters.initial_control_points = os.path.normpath(
+                os.path.join(self.odir, "output/DeterministicAtlas__EstimatedParameters__ControlPoints.txt"))
+            xml_parameters.freeze_control_points = True
+
+
+        # Overwriting main parameters
+        xml_parameters.number_of_time_points = number_of_time_points
+
+        if xml_params is None:
+            xml_params = dict()
+        for x in xml_params:
+            try:
+                print("overwriting parameters: ", x, "from: ", getattr(xml_parameters, x), "to: ", xml_params[x])
+                setattr(xml_parameters, x, xml_params[x])
+            except AttributeError as e:
+                print(e)
+                print("no estimation done")
+                return
+
 
         # Template
         template_object = xml_parameters._initialize_template_object_xml_parameters()
         template_object['deformable_object_type'] = self.object_type
         template_object['attachment_type'] = self.attachment
         template_object['kernel_type'] = 'torch'
-        template_object['noise_std'] =  self.p_noise
+        template_object['noise_std'] = self.p_noise
         template_object['kernel_width'] = self.p_kernel_width_geometry
 
-        template_object['filename'] = os.path.normpath(
-            os.path.join(self.odir, "output/DeterministicAtlas__EstimatedParameters__Template_"+self.id+".vtk"))
+        if use_template:
+            template_object['filename'] = os.path.normpath(
+                os.path.join(self.odir, "output/DeterministicAtlas__EstimatedParameters__Template_"+self.id+".vtk"))
+        else:
+            template_object['filename'] = self.initial_guess
+
         xml_parameters.template_specifications[self.id] = template_object
+
 
         # Deformation parameters
         xml_parameters.deformation_kernel_width = self.p_kernel_width_deformation
@@ -496,6 +523,9 @@ class DeformetricaAtlasEstimation():
         a_momenta = np.loadtxt(self.odir + "output/DeterministicAtlas__EstimatedParameters__Momenta.txt")
         shape = a_momenta[0,:].astype("int")
         return a_momenta[1:, :].reshape(shape)
+
+    def read_residuals(self):
+        return np.loadtxt(self.odir + "output/DeterministicAtlas__EstimatedParameters__Residuals.txt")
 
     def read_ctrlpoints(self):
         return np.loadtxt(self.odir + "output/DeterministicAtlas__EstimatedParameters__ControlPoints.txt")
