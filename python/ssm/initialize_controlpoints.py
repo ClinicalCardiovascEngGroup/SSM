@@ -14,8 +14,8 @@ from vtk.util import numpy_support as nps
 from . import iovtk
 
 
-from deformetrica.core.models.model_functions import create_regular_grid_of_points
-from deformetrica.in_out.array_readers_and_writers import write_2D_array
+from deformetrico.core.models.model_functions import create_regular_grid_of_points
+from deformetrico.in_out.array_readers_and_writers import write_2D_array
 
 
 def get_mesh_bounding_box(pd):

@@ -284,8 +284,7 @@ class DeformetricaAtlasEstimation():
         if not do_keep_all:
             if odir.find(" ") == -1:
                 for f in glob.glob(odir + "DeterministicAtlas__flow__*.vtk"):
-                    sp.call(["rm", f])
-                #sp.call("rm " + , shell=True)
+                    os.remove(f)
             else:
                 print("cannot remove flow files because of ' '")
 
