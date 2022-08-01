@@ -17,8 +17,32 @@ import numpy as np
 import vtk
 
 
+
 ################################################################################
 ##  Mesh processing and registrations
+
+def _read_polydata_from_unstructuredgrid(fi):
+    '''
+    we need polydata,
+    two filters that could be useful if you have unstructured grid
+    kind of a (stupid) cheatsheet, should it two functions?
+    '''
+    ugreader = vtk.vtkUnstructuredGridReader()
+    ugreader.SetFileName(fi)
+    ugreader.Update()
+    ug = ugreader.GetOutput()
+    gf = vtk.vtkGeometryFilter()
+    gf.SetInputData(ug)
+    gf.Update()
+    return gf.GetOutput()
+
+def triangle_filter(pd):
+    ''' only triangle cells '''
+    tri_filter = vtk.vtkTriangleFilter()
+    tri_filter.SetInputData(pd)
+    tri_filter.Update()
+    return tri_filter.GetOutput()
+
 
 def DecimatePolyData(pd, reduction=0.9, ntarget=None):
     """
@@ -88,11 +112,19 @@ def LandmarkSimilitudRegistration(fix, mov):
     transform.Update()
     return transform
 
+def apply_transform(transform, mesh):
+    """ call vtkTransformPolyDataFilter """
+    warper = vtk.vtkTransformPolyDataFilter()
+    warper.SetTransform(transform)
+    warper.SetInputData(mesh)
+    warper.Update()
+    return warper.GetOutput()
 
-def ICPSimilitudRegistration(fix, mov, fix_ldm=None, mov_ldm=None, do_rigid=False):
+
+def ICPSimilitudRegistration(fix, mov, fix_ldm=None, mov_ldm=None, do_rigid=False, do_apply=False):
     """
     IterativeClosestPoint registration between two vtkPolyData
-    return the vtkTransform
+    return the vtkTransform (and the transformed mesh if do_apply)
 
     can be initialized using landmarks
     (then return a composed vtkTransform instead of a vtkIterativeClosestPointTransform)
@@ -132,50 +164,54 @@ def ICPSimilitudRegistration(fix, mov, fix_ldm=None, mov_ldm=None, do_rigid=Fals
         composed.SetInput(transform)
         composed.PreMultiply()
         composed.Concatenate(ldm_transform)
-        return composed
+        tfm = composed
+
 
     else:
         transform.SetStartByMatchingCentroids(True)
-
-        # ICP registration
+        #transform.SetCheckMeanDistance(True)
         transform.SetSource(mov)
         transform.Update()
-        return transform
+        #transform.GetMeanDistance()
+        tfm = transform
 
-
-def apply_transform(transform, mesh):
-    """ call vtkTransformPolyDataFilter """
-    warper = vtk.vtkTransformPolyDataFilter()
-    warper.SetTransform(transform)
-    warper.SetInputData(mesh)
-    warper.Update()
-    return warper.GetOutput()
+    if do_apply:
+        return tfm, apply_transform(tfm, mov)
+    else:
+        return tfm
 
 
 ################################################################################
 ### Flipping mesh
-def flipx(pd, c):
-    """ flip mesh along x-axis and center c (only cx matters) """
+def reverse(pd):
+    rev = vtk.vtkReverseSense()
+    rev.SetInputData(pd)
+    rev.Update()
+    return rev.GetOutput()
+
+def flip(pd, c=(0,0,0), ax=(-1,1,1)):
+    """ flip mesh along some axes and center c (only cx matters) """
 
     # setting up the transform (could be factorised if applied t o several subjects), but not a big overhead
-    d = tuple([-x for x in c])
-
     transform = vtk.vtkTransform()
     transform.PostMultiply()
-    transform.Translate(d)
-    transform.Scale(-1, 1, 1)
+    transform.Translate(tuple([-x for x in c]))
+    transform.Scale(ax[0], ax[1], ax[2])
     transform.Translate(c)
 
-    t = vtk.vtkTransformPolyDataFilter()
-    t.SetTransform(transform)
+    pd = apply_transform(transform, pd)
 
-    rev = vtk.vtkReverseSense()
+    # reverse normals if odd number of flips
+    if ax[0]*ax[1]*ax[2] < 0:
+        rev = vtk.vtkReverseSense()
+        rev.SetInputData(pd)
+        rev.Update()
+        return rev.GetOutput(), transform
+    else:
+        return pd, transform
 
-    # apply
-    t.SetInputData(pd)
-    t.Update()
 
-    rev.SetInputData(t.GetOutput())
-    rev.Update()
-
-    return rev.GetOutput()
+def flipx(pd, c):
+    """ flip mesh along x-axis and center c (only cx matters) """
+    print('obsolete (ssm.tools.flipx): use ssm.tools.flip')
+    return flip(pd, c, (-1,1,1))[0]

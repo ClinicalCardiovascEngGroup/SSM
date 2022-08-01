@@ -18,7 +18,10 @@ from vtk.util import numpy_support as nps
 ##  Mesh distance
 
 def polydata_distance(mflo, mref, do_signed=True):
-    """ distance from mflo to mref """
+    """
+    distance from mflo to mref
+    /!\ (silently) do not work properly if the cells are not triangles 
+    """
     pdd = vtk.vtkDistancePolyDataFilter()
     pdd.SetSignedDistance(do_signed) #pdd.SignedDistanceOff()
     pdd.SetInputData(0, mflo)
