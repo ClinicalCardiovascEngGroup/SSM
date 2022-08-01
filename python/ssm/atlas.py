@@ -28,17 +28,16 @@ import vtk
 from vtk.util import numpy_support as nps
 import torch
 
-
-import deformetrica
+sys.path.append('/home/face3d/programs/deformetrica/')
+import deformetrico as deformetrica
 
 from . import iovtk
 from . import data_set_xml
 from . import visualization_tools
 
-
-import logging
-logger = logging.getLogger("ssm_atlas")
-logger.setLevel(logging.INFO)
+#import logging
+#logger = logging.getLogger("ssm_atlas")
+#logger.setLevel(logging.INFO)
 
 ################################################################################
 ##  Deformetrica estimation class
@@ -52,6 +51,7 @@ class DeformetricaAtlasEstimation():
         self.id = name
         self.object_type = 'surfacemesh'
         self.attachment = 'current'
+        self.description = ''
 
         if isinstance(initial_guess, int):
             self.initial_guess = self.lf[initial_guess]
@@ -104,7 +104,8 @@ class DeformetricaAtlasEstimation():
             "kwg":self.p_kernel_width_geometry,
             "noise":self.p_noise,
             "object_type":self.object_type,
-            "attachment":self.attachment
+            "attachment":self.attachment,
+            "description":self.description
             }
         if do_save_lvtk:
             d.update({"files":self.lf})
@@ -124,6 +125,14 @@ class DeformetricaAtlasEstimation():
             self.p_kernel_width_deformation = d["kwd"]
             self.p_kernel_width_geometry = d["kwg"]
             self.p_noise = d["noise"]
+
+            if self.n_subjects == 0:
+                print("W: idir path {} does not match any existing file".format(self.idir))
+            if not os.path.exists(os.path.abspath(self.odir)):
+                print("W: odir path {} does not exist".format(self.odir))
+            if not os.path.exists(os.path.abspath(self.initial_guess)):
+                print("W: initial_template path {} does not exist".format(self.initial_guess))
+
             try:
                 self.lf = d["files"]
                 if len(d["files"]) > 5:
@@ -133,6 +142,7 @@ class DeformetricaAtlasEstimation():
             try:
                 self.object_type = d["object_type"]
                 self.attachment = d["attachment"]
+                self.description = d["description"]
             except KeyError:
                 pass
 
@@ -140,6 +150,7 @@ class DeformetricaAtlasEstimation():
                 print("loading parameters: ")
                 for k in d:
                     print("  {:6}: {}".format(k, d[k]))
+                print("n subjects: ", self.n_subjects)
 
 
     def check_initialisation(self, do_quick=False):
@@ -246,7 +257,6 @@ class DeformetricaAtlasEstimation():
                 print("no estimation done")
                 return
 
-
         # Template
         template_object = xml_parameters._initialize_template_object_xml_parameters()
         template_object['deformable_object_type'] = self.object_type
@@ -280,7 +290,7 @@ class DeformetricaAtlasEstimation():
                 print("cannot remove flow files because of ' '")
 
 
-    def shooting(self, fv, odir, tmin=-5, tmax=+5, fmesh=None, do_keep_all=False, concentration_of_time_points=4):
+    def shooting(self, fv, odir, tmin=-5, tmax=+5, fmesh=None, fcontrolpoints=None, do_keep_all=False, concentration_of_time_points=4):
         """
         warp Atlas using momenta in fv
         interesting momenta are in DeterministicAtlas__EstimatedParameters__Momenta.txt
@@ -290,6 +300,7 @@ class DeformetricaAtlasEstimation():
             odir    output directory
             tmin, tmax shooting parameters
             fmesh   mesh to deform (default=Template)
+            fcontrolpoints control points (default from output dir)
             do_keep_all do keep all the result files
         return:
             None
@@ -301,8 +312,10 @@ class DeformetricaAtlasEstimation():
         xml_parameters._read_model_xml(self.model_xml)
 
         xml_parameters.model_type = "shooting"
-        xml_parameters.initial_control_points = os.path.normpath(
-            os.path.join(self.odir, "output/DeterministicAtlas__EstimatedParameters__ControlPoints.txt"))
+        if fcontrolpoints is None:
+            fcontrolpoints = os.path.normpath(
+                os.path.join(self.odir, "output/DeterministicAtlas__EstimatedParameters__ControlPoints.txt"))
+        xml_parameters.initial_control_points = fcontrolpoints
         xml_parameters.initial_momenta = fv
 
         # Template
@@ -487,8 +500,6 @@ class DeformetricaAtlasEstimation():
         return odir + "backward_momenta.txt", odir +  "backward_ctrlpts.txt"
 
 
-
-
     def convolve_momentum(self, m, x):
         """
         kernel convolution of momenta at points x
@@ -537,8 +548,6 @@ class DeformetricaAtlasEstimation():
         ctrlpts = self.read_ctrlpoints()
         vtkp = iovtk.controlpoints_to_vtkPoints(ctrlpts, X)
         iovtk.WritePolyData(os.path.normpath(os.path.join(self.odir, fname)), vtkp)
-
-
 
 
     def render_momenta_norm(self, moments, do_weight=False, set_xmax=None, do_sq_norm=True, do_render=False, fname=""):

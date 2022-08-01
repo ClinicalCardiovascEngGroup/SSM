@@ -12,8 +12,6 @@ work in progress...
 
 * recursive atlas estimation
 * organize output
-* update for 4.3.0, in particular packaging was improved in 4.3.0. No more modules api, core, in_out and support at the same level.
-
 
 --------------------------------------------------------------------------------
 
@@ -21,6 +19,9 @@ work in progress...
 
 * Deformetrica 4.3
 * VTK 8.2.0
+
+Deformetrica 4.3.0 update introduced many breaking changes. In particular packaging was improved and no more modules api, core, in_out and support at the same level.
+
 
 --------------------------------------------------------------------------------
 ### How to run - Manual

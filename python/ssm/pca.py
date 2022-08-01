@@ -20,12 +20,8 @@ import matplotlib.pyplot as plt
 
 from . import iovtk
 
-import logging
-logger = logging.getLogger("ssm_pca")
-logger.setLevel(logging.INFO)
-
 # deformetrica messing with the verbosity level...
-logging.getLogger('matplotlib.font_manager').disabled = True
+#logging.getLogger('matplotlib.font_manager').disabled = True
 
 
 ################################################################################
@@ -109,7 +105,6 @@ class DeformetricaAtlasPCA():
         ax1.set_title("First eigvalues (log-scale)")
         ax1.grid(True)
         ax1.set_yscale("log", nonpositive='mask')
-
 
         ax2.plot(np.concatenate((np.zeros(1), (self.pca_s**2).cumsum()/(self.pca_s**2).sum())), "+-", linewidth=3, markersize=8)
         ax2.set_title("Cumulative variance")
@@ -219,13 +214,12 @@ class DeformetricaAtlasPCA():
             ax.plot(x1, y1, ".", ms=7)
         else:
             mp = ax.scatter(x1, y1, c=color, s=size, **kwargs)
-            fig.colorbar(mp)
+            fig.colorbar(mp, shrink=0.8)
 
         if labels:
             N = self.pca_u.shape[0]
             if isinstance(labels, bool):
                 labels = [str(i) for i in range(N)]
-
             if (len(labels) == N):
                 d1 = (x1**2 + y1**2)
                 k = N - 1 - nmaxlabels
@@ -254,7 +248,6 @@ class DeformetricaAtlasPCA():
         ax.spines['right'].set_visible(False)
 
         return fig
-
 
 
 
