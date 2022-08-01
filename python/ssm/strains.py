@@ -10,7 +10,6 @@ Strain measures from deformation
         Kleijn2011 https://www.onlinejase.com/article/S0894-7317(11)00047-2/pdf
         Jia2017 https://hal.inria.fr/hal-01574831/document
 
-
 """
 
 import subprocess as sp
@@ -20,10 +19,10 @@ import numpy as np
 import torch
 
 import vtk
-
 from vtk.util import numpy_support as nps
 
-import deformetrica
+sys.path.append('/home/face3d/programs/deformetrica/')
+from deformetrico import kernels as dfcakernels
 
 ################################################################################
 ##  Vessel coordinate system
@@ -151,7 +150,7 @@ def gradU_from_momenta(x, p, y, sigma):
     return
     gradU (M, D, D)
     """
-    kern = deformetrica.support.kernels.factory("torch", gpu_mode=False, kernel_width=sigma)
+    kern = dfcakernels.factory("torch", gpu_mode=False, kernel_width=sigma)
 
     # move tensors with respect to gpu_mode
     t_x = torch.tensor(x, device="cpu")
