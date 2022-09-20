@@ -122,11 +122,14 @@ def zval_kperm_2pairedsamp(X, nperm):
 
 ################################################################################
 
-def zmap_kperm_llh(X, y, nperm, nvar0=1):
+def zmap_kperm_llh(X, y, nperm, nvar0=1, mode="cst"):
     """
-    WIP
     log-likelihood testing for non parametric permutation regression testing
     nvar0 is used to set the reference model
+
+    2 options are possible (mode)
+    - mode == "cst" the reference model is not permuted
+    - mode == "per" the reference model is permuted with the same permutations (useful for joint model for example)
 
     X (n, d, p) deformation
     y (n, q)    clinicals
@@ -137,7 +140,12 @@ def zmap_kperm_llh(X, y, nperm, nvar0=1):
     np.max(L[:, 1:], axis=0)   permutation maxs
     """
     n, d, p = X.shape
-    K = np.zeros((d, 1))
+    if mode == "cst":
+        K = np.zeros((d, 1))
+    elif mode == "per":
+        K = np.zeros((d, nperm+1))
+    else:
+        raise ValueError("mode for zmap_kperm_llh unknown:", mode)
     L = np.zeros((d, nperm+1))
 
     # reference model and no permutation
@@ -148,9 +156,15 @@ def zmap_kperm_llh(X, y, nperm, nvar0=1):
     for k in range(nperm):
         #np.random.seed(k)
         per = np.random.permutation(n)
-        yp = y.copy()
-        yp[:, nvar0:] = y[per, nvar0:]
-        L[:, k+1] = regression_loglikelihood(X, yp)
+        if mode == "cst":
+            yp = y.copy()
+            yp[:, nvar0:] = y[per, nvar0:]
+            L[:, k+1] = regression_loglikelihood(X, yp)
+        elif mode == "per":
+            K[:, k+1] = regression_loglikelihood(X, y[per, :nvar0])
+            L[:, k+1] = regression_loglikelihood(X, y[per, :])
+        else:
+            pass
 
     L = L - K
     return L, L[:, 0], np.max(L[:, 1:], axis=0)
